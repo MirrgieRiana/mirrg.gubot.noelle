@@ -35,10 +35,13 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import jp.hishidama.swing.layout.GroupLayoutUtil;
+import mirrg.swing.neon.v1_1.artifacts.logging.FrameLog;
 
 public class GUNoelle
 {
@@ -64,8 +67,10 @@ public class GUNoelle
 	protected JLabel faceLabelGuessed;
 	protected JLabel labelStatus;
 	protected JTextField textFieldNameHeroine;
+	protected JLabel labelSearching;
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
+	protected JLabel labelStatusSearch;
 	protected JLabel faceLabelSelected;
 	protected JList<String> listHeroines;
 	protected JList<String> listButtleClass;
@@ -94,21 +99,40 @@ public class GUNoelle
 			frameMain.add(createVerticalSplitPane(
 				createVerticalBorderPanel(
 					createHorizontalBorderPanel(
-						null,
+						get(() -> {
+							JCheckBox checkBoxRunning = new JCheckBox("監視");
+							checkBoxRunning.setSelected(true);
+							checkBoxRunning.addActionListener(e -> {
+								if (checkBoxRunning.isSelected()) {
+									start();
+								} else {
+									stop();
+								}
+							});
+							return checkBoxRunning;
+						}),
+						createHorizontalBorderPanel(
+							null,
+							null,
+							createButton("ログ", e -> {
+								new FrameLog(500).setVisible(true);
+							})),
+						createButton("スクリーン表示", e -> {
+							dialogScreen.pack();
+							dialogScreen.setVisible(!dialogScreen.isVisible());
+						})),
+					createVerticalBorderPanel(
 						get(() -> {
 							labelGUFound = new JLabel();
 							setPreferredSize(labelGUFound, 200, 1);
 							return labelGUFound;
 						}),
-						createButton("スクリーン表示", e -> {
-							dialogScreen.pack();
-							dialogScreen.setVisible(!dialogScreen.isVisible());
-						})),
-					get(() -> {
-						listBlackPixels = new JList<String>();
-						listBlackPixels.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
-						return createScrollPane(listBlackPixels, 260, 80);
-					}),
+						get(() -> {
+							listBlackPixels = new JList<String>();
+							listBlackPixels.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
+							return createScrollPane(listBlackPixels, 260, 80);
+						}),
+						null),
 					null),
 				createVerticalBorderPanel(
 					createHorizontalBorderPanel(
@@ -132,7 +156,7 @@ public class GUNoelle
 						null),
 					createVerticalBorderPanel(
 						createHorizontalBorderPanel(
-							null,
+							new JLabel("ヒロイン名："),
 							get(() -> {
 								textFieldNameHeroine = new JTextField(10);
 								textFieldNameHeroine.addActionListener(e -> {
@@ -140,73 +164,81 @@ public class GUNoelle
 								});
 								return textFieldNameHeroine;
 							}),
-							createButton("Register", e -> {
+							createButton("登録", e -> {
 								doRegister();
 							})),
 						createVerticalBorderPanel(
-							createPanel(p -> {
-								{
-									spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
-									p.add(spinnerSkipLimitMax);
-								}
-								{
-									labelSkipLimit = new JLabel();
-									setPreferredSize(labelSkipLimit, 40, 1);
-									p.add(labelSkipLimit);
-								}
-								p.add(createButton("Search", e -> {
-									startSearch();
-								}));
-								{
-									JCheckBox checkBoxRunning = new JCheckBox("監視");
-									checkBoxRunning.setSelected(true);
-									checkBoxRunning.addActionListener(e -> {
-										if (checkBoxRunning.isSelected()) {
-											start();
-										} else {
-											stop();
-										}
-									});
-									p.add(checkBoxRunning);
-								}
-							}),
-							createHorizontalSplitPane(
-								createVerticalBorderPanel(
-									createPanel(p -> {
-										{
-											faceLabelSelected = new FaceLabel();
-											p.add(faceLabelSelected);
-										}
-									}),
+							createHorizontalBorderPanel(
+								new JLabel("最大反復回数："),
+								createHorizontalBorderPanel(
+									null,
+									createHorizontalBorderPanel(
+										null,
+										createHorizontalBorderPanel(
+											null,
+											null,
+											get(() -> {
+												labelSearching = new JLabel("停止中");
+												setPreferredSize(labelSearching, 40, 1);
+												return labelSearching;
+											})),
+										get(() -> {
+											spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
+											spinnerSkipLimitMax.setAlignmentX(0.5f);
+											((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+											return spinnerSkipLimitMax;
+										})),
 									get(() -> {
-										listHeroines = new JList<String>();
-										refreshHeroines();
-										RegistryHeroine.addListener(h -> {
-											refreshHeroines();
-										});
-										listHeroines.addListSelectionListener(e -> {
-											String name = listHeroines.getSelectedValue();
-											if (name != null) {
-												if (name.equals("None")) {
-													faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
-												} else {
-													faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
-												}
-											} else {
-												faceLabelSelected.setIcon(null);
-											}
-										});
-										return createScrollPane(listHeroines, 120, 200);
-									}),
-									null),
-								get(() -> {
-									listButtleClass = new JList<String>();
-									listButtleClass.setListData(Stream.concat(
-										Stream.of("None"),
-										Stream.of(RegistryHeroine.getBattleClasses()))
-										.toArray(String[]::new));
-									return createScrollPane(listButtleClass, 120, 300);
+										labelSkipLimit = new JLabel("0");
+										labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
+										setPreferredSize(labelSkipLimit, 40, 1);
+										return labelSkipLimit;
+									})),
+								createButton("検索", e -> {
+									startSearch();
 								})),
+							createVerticalBorderPanel(
+								get(() -> {
+									labelStatusSearch = new JLabel("");
+									setPreferredSize(labelStatusSearch, 200, 1);
+									return labelStatusSearch;
+								}),
+								createHorizontalSplitPane(
+									createVerticalBorderPanel(
+										createPanel(get(() -> {
+											faceLabelSelected = new FaceLabel();
+											return faceLabelSelected;
+										})),
+										get(() -> {
+											listHeroines = new JList<String>();
+											refreshHeroines();
+											RegistryHeroine.addListener(h -> {
+												refreshHeroines();
+											});
+											listHeroines.addListSelectionListener(e -> {
+												String name = listHeroines.getSelectedValue();
+												if (name != null) {
+													if (name.equals("None")) {
+														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
+													} else {
+														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
+													}
+												} else {
+													faceLabelSelected.setIcon(null);
+												}
+											});
+											return createScrollPane(listHeroines, 120, 200);
+										}),
+										null),
+									get(() -> {
+										listButtleClass = new JList<String>();
+										listButtleClass.setListData(Stream.concat(
+											Stream.of("None"),
+											Stream.of(RegistryHeroine.getBattleClasses()))
+											.toArray(String[]::new));
+										return createScrollPane(listButtleClass, 120, 300);
+									})),
+								null),
 							null),
 						null),
 					null)));
@@ -240,52 +272,70 @@ public class GUNoelle
 			int t = 0;
 			int skipLimit = (Integer) spinnerSkipLimitMax.getValue();
 
-			while (true) {
-				labelSkipLimit.setText("" + skipLimit);
+			SwingUtilities.invokeLater(() -> {
+				labelStatusSearch.setText("");
+				labelSearching.setText("実行中");
+			});
+			try {
+				while (true) {
+					labelSkipLimit.setText("" + skipLimit);
 
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e1) {
-					return;
-				}
-				t += 20;
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e1) {
+						return;
+					}
+					t += 20;
 
-				// 最小化時に終わる
-				if (gu == null) break;
+					// 最小化時に終わる
+					if (gu == null) {
+						SwingUtilities.invokeLater(() -> {
+							labelStatusSearch.setText("GUの画面が最小化されました。");
+						});
+						break;
+					}
 
-				// 黒背景
-				if (isBlankProvided()) {
-					t = 0;
-					continue;
-				}
+					// 黒背景
+					if (isBlankProvided()) {
+						t = 0;
+						continue;
+					}
 
-				// 既知ヒロイン（＝飛ばすべきもの）が居た場合
-				if (isKnownHeroineProvided()) {
+					// 既知ヒロイン（＝飛ばすべきもの）が居た場合
+					if (isKnownHeroineProvided()) {
 
-					label2:
-					{
-
-						// キャッチヒロインに指定されている場合飛ばさない
+						// キャッチヒロインに指定されている場合終了
 						if (listHeroines.getSelectedValuesList().stream()
 							.map(o -> (String) o)
 							.filter(b -> b.equals(heroine.name))
 							.findAny()
 							.isPresent()) {
-							break label2;
+							SwingUtilities.invokeLater(() -> {
+								labelStatusSearch.setText("指定のヒロインです。");
+							});
+							break;
 						}
 
-						// キャッチクラスに指定されている場合飛ばさない
+						// キャッチクラスに指定されている場合終了
 						if (listButtleClass.getSelectedValuesList().stream()
 							.map(o -> (String) o)
 							.filter(b -> b.equals(heroine.getButtleClass()))
 							.findAny()
 							.isPresent()) {
-							break label2;
+							SwingUtilities.invokeLater(() -> {
+								labelStatusSearch.setText("指定のクラスのヒロインです。");
+							});
+							break;
 						}
 
 						// 飛ばしてよい
 
-						if (skipLimit <= 0) break; // 回数オーバー
+						if (skipLimit <= 0) { // 回数オーバー
+							SwingUtilities.invokeLater(() -> {
+								labelStatusSearch.setText("規定回数の検索が終了しました。");
+							});
+							break;
+						}
 						skipLimit--;
 
 						gu.next();
@@ -293,19 +343,29 @@ public class GUNoelle
 						try {
 							Thread.sleep(500);
 						} catch (InterruptedException e1) {
-							return;
+							SwingUtilities.invokeLater(() -> {
+								labelStatusSearch.setText("スレッドが中断されました。");
+							});
+							break;
 						}
 
 						t = 0;
 						continue;
 					}
-				}
 
-				// 飛ばすべきものでなく黒画像でもない状況で0.5秒経過
-				if (t > 500) {
-					break;
-				}
+					// 飛ばすべきものでなく黒画像でもない状況で0.5秒経過
+					if (t > 500) {
+						SwingUtilities.invokeLater(() -> {
+							labelStatusSearch.setText("未知のヒロインです。");
+						});
+						break;
+					}
 
+				}
+			} finally {
+				SwingUtilities.invokeLater(() -> {
+					labelSearching.setText("停止中");
+				});
 			}
 		});
 		thread.setDaemon(true);
