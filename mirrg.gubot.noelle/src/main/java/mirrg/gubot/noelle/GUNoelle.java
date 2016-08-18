@@ -12,6 +12,8 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -68,13 +70,15 @@ public class GUNoelle
 	protected JLabel faceLabelGuessed;
 	protected JLabel labelStatus;
 	protected JTextField textFieldNameHeroine;
-	protected JLabel labelSearching;
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
+	protected JLabel labelSearching;
 	protected JLabel labelStatusSearch;
 	protected JLabel faceLabelSelected;
 	protected JList<String> listHeroines;
 	protected JList<String> listButtleClass;
+
+	protected boolean isIconified;
 
 	protected JDialog dialogScreen;
 	protected JLabel labelGUScreen;
@@ -95,6 +99,52 @@ public class GUNoelle
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
+
+			frameMain.addWindowListener(new WindowListener() {
+
+				@Override
+				public void windowOpened(WindowEvent e)
+				{
+
+				}
+
+				@Override
+				public void windowIconified(WindowEvent e)
+				{
+					isIconified = true;
+				}
+
+				@Override
+				public void windowDeiconified(WindowEvent e)
+				{
+					isIconified = false;
+				}
+
+				@Override
+				public void windowDeactivated(WindowEvent e)
+				{
+
+				}
+
+				@Override
+				public void windowClosing(WindowEvent e)
+				{
+
+				}
+
+				@Override
+				public void windowClosed(WindowEvent e)
+				{
+
+				}
+
+				@Override
+				public void windowActivated(WindowEvent e)
+				{
+
+				}
+
+			});
 
 			frameMain.setLayout(new CardLayout());
 			frameMain.add(createVerticalSplitPane(
@@ -290,6 +340,14 @@ public class GUNoelle
 					t += 20;
 
 					// 最小化時に終わる
+					if (isIconified) {
+						SwingUtilities.invokeLater(() -> {
+							labelStatusSearch.setText("ツール画面が最小化されました。");
+						});
+						break;
+					}
+
+					// GU最小化時に終わる
 					if (gu == null) {
 						SwingUtilities.invokeLater(() -> {
 							labelStatusSearch.setText("GUの画面が最小化されました。");
@@ -397,6 +455,7 @@ public class GUNoelle
 
 	public void show()
 	{
+		isIconified = false;
 		frameMain.setVisible(true);
 	}
 
@@ -413,7 +472,7 @@ public class GUNoelle
 		thread = new Thread(() -> {
 			while (true) {
 
-				update();
+				if (!isIconified) update();
 
 				try {
 					Thread.sleep(20);
