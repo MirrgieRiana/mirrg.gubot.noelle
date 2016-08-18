@@ -1,1 +1,0 @@
-javaw -cp bin mirrg.gubot.noelle.GUNoelle

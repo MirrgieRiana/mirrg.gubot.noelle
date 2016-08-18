@@ -53,6 +53,16 @@ def outputLocation =
 // ★まとまったJarとして出力する
 def allInOne = true
 
+task createRunBat(type: Copy) {
+	from 'templates'
+	into '../repos'
+	expand(['version': superversion + "." + subversion])
+	outputs.upToDateWhen {
+		false
+	}
+}
+uploadArchives.dependsOn createRunBat
+
 //////////////////////////////////////////////////////////////////////
 
 version = superversion + "." + subversion
