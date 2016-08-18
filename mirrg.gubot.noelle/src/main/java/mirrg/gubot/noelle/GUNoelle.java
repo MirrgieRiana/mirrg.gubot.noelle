@@ -61,6 +61,7 @@ public class GUNoelle
 	protected int width;
 
 	protected JFrame frameMain;
+	protected JCheckBox checkBoxRunning;
 	protected JLabel labelGUFound;
 	protected JList<String> listBlackPixels;
 	protected JLabel faceLabelTrimed;
@@ -100,7 +101,7 @@ public class GUNoelle
 				createVerticalBorderPanel(
 					createHorizontalBorderPanel(
 						get(() -> {
-							JCheckBox checkBoxRunning = new JCheckBox("監視");
+							checkBoxRunning = new JCheckBox("監視");
 							checkBoxRunning.setSelected(true);
 							checkBoxRunning.addActionListener(e -> {
 								if (checkBoxRunning.isSelected()) {
@@ -195,6 +196,7 @@ public class GUNoelle
 										return labelSkipLimit;
 									})),
 								createButton("検索", e -> {
+									if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
 									startSearch();
 								})),
 							createVerticalBorderPanel(
