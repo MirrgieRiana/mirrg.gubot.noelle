@@ -179,21 +179,21 @@ public class GUNoelle
 											null,
 											null,
 											get(() -> {
-												labelSearching = new JLabel("停止中");
-												setPreferredSize(labelSearching, 40, 1);
-												return labelSearching;
+												spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
+												spinnerSkipLimitMax.setAlignmentX(0.5f);
+												((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+												return spinnerSkipLimitMax;
 											})),
 										get(() -> {
-											spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
-											spinnerSkipLimitMax.setAlignmentX(0.5f);
-											((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
-											return spinnerSkipLimitMax;
+											labelSkipLimit = new JLabel("0");
+											labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
+											setPreferredSize(labelSkipLimit, 40, 1);
+											return labelSkipLimit;
 										})),
 									get(() -> {
-										labelSkipLimit = new JLabel("0");
-										labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
-										setPreferredSize(labelSkipLimit, 40, 1);
-										return labelSkipLimit;
+										labelSearching = new JLabel("停止中");
+										setPreferredSize(labelSearching, 40, 1);
+										return labelSearching;
 									})),
 								createButton("検索", e -> {
 									if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
