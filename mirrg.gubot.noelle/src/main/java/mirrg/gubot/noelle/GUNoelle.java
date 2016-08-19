@@ -31,6 +31,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -146,10 +147,28 @@ public class GUNoelle
 
 			});
 
+			{
+				JMenuBar menubar = new JMenuBar();
+				menubar.add(createButton("ログ", e -> {
+					new FrameLog(500).setVisible(true);
+				}));
+				menubar.add(createButton("スクリーン", e -> {
+					dialogScreen.pack();
+					dialogScreen.setVisible(!dialogScreen.isVisible());
+				}));
+				frameMain.setJMenuBar(menubar);
+			}
+
 			frameMain.setLayout(new CardLayout());
 			frameMain.add(createVerticalSplitPane(
 				createVerticalBorderPanel(
 					createHorizontalBorderPanel(
+						null,
+						get(() -> {
+							labelGUFound = new JLabel();
+							setPreferredSize(labelGUFound, 200, 1);
+							return labelGUFound;
+						}),
 						get(() -> {
 							checkBoxRunning = new JCheckBox("監視");
 							checkBoxRunning.setSelected(true);
@@ -161,29 +180,12 @@ public class GUNoelle
 								}
 							});
 							return checkBoxRunning;
-						}),
-						createHorizontalBorderPanel(
-							null,
-							null,
-							createButton("ログ", e -> {
-								new FrameLog(500).setVisible(true);
-							})),
-						createButton("スクリーン表示", e -> {
-							dialogScreen.pack();
-							dialogScreen.setVisible(!dialogScreen.isVisible());
 						})),
-					createVerticalBorderPanel(
-						get(() -> {
-							labelGUFound = new JLabel();
-							setPreferredSize(labelGUFound, 200, 1);
-							return labelGUFound;
-						}),
-						get(() -> {
-							listBlackPixels = new JList<String>();
-							listBlackPixels.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
-							return createScrollPane(listBlackPixels, 260, 80);
-						}),
-						null),
+					get(() -> {
+						listBlackPixels = new JList<String>();
+						listBlackPixels.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
+						return createScrollPane(listBlackPixels, 260, 80);
+					}),
 					null),
 				createVerticalBorderPanel(
 					createHorizontalBorderPanel(
