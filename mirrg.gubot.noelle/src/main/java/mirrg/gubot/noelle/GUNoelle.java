@@ -598,7 +598,7 @@ public class GUNoelle
 				island.get().getWidth(),
 				island.get().getHeight(),
 				island.get().area));
-			labelGUScreen.setIcon(new ImageIcon(gu.image));
+			if (dialogScreen.isVisible()) labelGUScreen.setIcon(new ImageIcon(gu.image));
 			faceLabelTrimed.setIcon(new ImageIcon(gu.imageFace));
 
 			Optional<Heroine> heroine = RegistryHeroine.getHeroines()
@@ -633,7 +633,7 @@ public class GUNoelle
 
 			// show
 			labelGUFound.setText("Not found");
-			labelGUScreen.setIcon(null);
+			if (dialogScreen.isVisible()) labelGUScreen.setIcon(null);
 			faceLabelTrimed.setIcon(null);
 			faceLabelGuessed.setIcon(null);
 			labelFaceParameters.setText("");
