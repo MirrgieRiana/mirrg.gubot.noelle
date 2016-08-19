@@ -27,19 +27,7 @@ public class RegistryHeroine
 
 		// フォルダ確保
 		File dir = new File("faces");
-		if (!dir.isDirectory()) {
-			if (dir.exists()) {
-				RuntimeException e = new RuntimeException("This is not a directory: " + dir);
-				HLog.processException(e);
-				throw e;
-			} else {
-				if (!dir.mkdir()) {
-					RuntimeException e = new RuntimeException("Failed to create directory: " + dir);
-					HLog.processException(e);
-					throw e;
-				}
-			}
-		}
+		GUNoelle.prepareDirectory(dir);
 
 		// 画像取得
 		Stream.of(dir.listFiles())

@@ -17,6 +17,8 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -45,6 +47,7 @@ import javax.swing.WindowConstants;
 
 import jp.hishidama.swing.layout.GroupLayoutUtil;
 import mirrg.swing.neon.v1_1.artifacts.logging.FrameLog;
+import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
 
 public class GUNoelle
 {
@@ -155,6 +158,26 @@ public class GUNoelle
 				menubar.add(createButton("スクリーン", e -> {
 					dialogScreen.pack();
 					dialogScreen.setVisible(!dialogScreen.isVisible());
+				}));
+				menubar.add(createButton("スクショ", e -> {
+					if (gu == null) {
+						labelStatusSearch.setText("スクリーンが認識できませんでした。");
+						return;
+					}
+					File dir = new File("screenshots");
+					prepareDirectory(dir);
+
+					File file = new File(dir, "" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")) + ".png");
+
+					try {
+						ImageIO.write(gu.image, "png", file);
+					} catch (IOException e1) {
+						HLog.processException(e1);
+						labelStatusSearch.setText("スクリーンショットの保存に失敗しました。");
+						return;
+					}
+
+					labelStatusSearch.setText("スクショ保存：" + file);
 				}));
 				frameMain.setJMenuBar(menubar);
 			}
@@ -620,6 +643,23 @@ public class GUNoelle
 	{
 		int rgb = image.getRGB(x, y);
 		return (((rgb & 0xff0000) >> 16) + ((rgb & 0xff00) >> 8) + (rgb & 0xff)) / 3;
+	}
+
+	public static void prepareDirectory(File dir)
+	{
+		if (!dir.isDirectory()) {
+			if (dir.exists()) {
+				RuntimeException e = new RuntimeException("This is not a directory: " + dir);
+				HLog.processException(e);
+				throw e;
+			} else {
+				if (!dir.mkdir()) {
+					RuntimeException e = new RuntimeException("Failed to create directory: " + dir);
+					HLog.processException(e);
+					throw e;
+				}
+			}
+		}
 	}
 
 	private static JSplitPane createHorizontalSplitPane(Component component1, Component component2)
