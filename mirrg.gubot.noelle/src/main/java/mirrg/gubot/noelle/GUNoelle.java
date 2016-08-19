@@ -44,6 +44,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.border.BevelBorder;
 
 import jp.hishidama.swing.layout.GroupLayoutUtil;
 import mirrg.swing.neon.v1_1.artifacts.logging.FrameLog;
@@ -72,15 +73,15 @@ public class GUNoelle
 	protected JList<String> listBlackPixels;
 	protected JLabel faceLabelTrimed;
 	protected JLabel faceLabelGuessed;
-	protected JLabel labelStatus;
+	protected JLabel labelFaceParameters;
 	protected JTextField textFieldNameHeroine;
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
 	protected JLabel labelSearching;
-	protected JLabel labelStatusSearch;
 	protected JLabel faceLabelSelected;
 	protected JList<String> listHeroines;
 	protected JList<String> listButtleClass;
+	protected JLabel labelStatusBar;
 
 	protected boolean isIconified;
 
@@ -161,7 +162,7 @@ public class GUNoelle
 				}));
 				menubar.add(createButton("スクショ", e -> {
 					if (gu == null) {
-						labelStatusSearch.setText("スクリーンが認識できませんでした。");
+						setStatusBar("スクリーンが認識できませんでした。");
 						return;
 					}
 					File dir = new File("screenshots");
@@ -173,11 +174,11 @@ public class GUNoelle
 						ImageIO.write(gu.image, "png", file);
 					} catch (IOException e1) {
 						HLog.processException(e1);
-						labelStatusSearch.setText("スクリーンショットの保存に失敗しました。");
+						setStatusBar("スクリーンショットの保存に失敗しました。");
 						return;
 					}
 
-					labelStatusSearch.setText("スクショ保存：" + file);
+					setStatusBar("スクショ保存：" + file);
 				}));
 				frameMain.setJMenuBar(menubar);
 			}
@@ -211,114 +212,121 @@ public class GUNoelle
 					}),
 					null),
 				createVerticalBorderPanel(
-					createHorizontalBorderPanel(
-						createPanel(get(() -> {
-							faceLabelTrimed = new FaceLabel();
-							return faceLabelTrimed;
-						})),
-						createHorizontalBorderPanel(
-							createPanel(get(() -> {
-								faceLabelGuessed = new FaceLabel();
-								return faceLabelGuessed;
-							})),
-							get(() -> {
-								labelStatus = new JLabel();
-								labelStatus.setBackground(Color.white);
-								labelStatus.setOpaque(true);
-								labelStatus.setPreferredSize(new Dimension(150, 90));
-								return labelStatus;
-							}),
-							null),
-						null),
+					null,
 					createVerticalBorderPanel(
 						createHorizontalBorderPanel(
-							new JLabel("ヒロイン名："),
-							get(() -> {
-								textFieldNameHeroine = new JTextField(10);
-								textFieldNameHeroine.addActionListener(e -> {
-									doRegister();
-								});
-								return textFieldNameHeroine;
-							}),
-							createButton("登録", e -> {
-								doRegister();
+							createPanel(get(() -> {
+								faceLabelTrimed = new FaceLabel();
+								return faceLabelTrimed;
 							})),
+							createHorizontalBorderPanel(
+								createPanel(get(() -> {
+									faceLabelGuessed = new FaceLabel();
+									return faceLabelGuessed;
+								})),
+								get(() -> {
+									labelFaceParameters = new JLabel();
+									labelFaceParameters.setBackground(Color.white);
+									labelFaceParameters.setOpaque(true);
+									labelFaceParameters.setPreferredSize(new Dimension(150, 90));
+									return labelFaceParameters;
+								}),
+								null),
+							null),
 						createVerticalBorderPanel(
 							createHorizontalBorderPanel(
-								new JLabel("最大反復回数："),
+								new JLabel("ヒロイン名："),
+								get(() -> {
+									textFieldNameHeroine = new JTextField(10);
+									textFieldNameHeroine.addActionListener(e -> {
+										doRegister();
+									});
+									return textFieldNameHeroine;
+								}),
+								createButton("登録", e -> {
+									doRegister();
+								})),
+							process(createVerticalBorderPanel(
 								createHorizontalBorderPanel(
-									null,
+									new JLabel("最大反復回数："),
 									createHorizontalBorderPanel(
 										null,
 										createHorizontalBorderPanel(
 											null,
-											null,
+											createHorizontalBorderPanel(
+												null,
+												null,
+												get(() -> {
+													spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
+													spinnerSkipLimitMax.setAlignmentX(0.5f);
+													((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+													return spinnerSkipLimitMax;
+												})),
 											get(() -> {
-												spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
-												spinnerSkipLimitMax.setAlignmentX(0.5f);
-												((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
-												return spinnerSkipLimitMax;
+												labelSkipLimit = new JLabel("0");
+												labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
+												setPreferredSize(labelSkipLimit, 40, 1);
+												return labelSkipLimit;
 											})),
 										get(() -> {
-											labelSkipLimit = new JLabel("0");
-											labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
-											setPreferredSize(labelSkipLimit, 40, 1);
-											return labelSkipLimit;
+											labelSearching = new JLabel("停止中");
+											setPreferredSize(labelSearching, 40, 1);
+											return labelSearching;
 										})),
-									get(() -> {
-										labelSearching = new JLabel("停止中");
-										setPreferredSize(labelSearching, 40, 1);
-										return labelSearching;
+									createButton("検索", e -> {
+										if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
+										startSearch();
 									})),
-								createButton("検索", e -> {
-									if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
-									startSearch();
-								})),
-							createVerticalBorderPanel(
-								get(() -> {
-									labelStatusSearch = new JLabel("");
-									setPreferredSize(labelStatusSearch, 200, 1);
-									return labelStatusSearch;
-								}),
-								createHorizontalSplitPane(
-									createVerticalBorderPanel(
-										createPanel(get(() -> {
-											faceLabelSelected = new FaceLabel();
-											return faceLabelSelected;
-										})),
-										get(() -> {
-											listHeroines = new JList<String>();
-											refreshHeroines();
-											RegistryHeroine.addListener(h -> {
+								createVerticalBorderPanel(
+									null,
+									createHorizontalSplitPane(
+										createVerticalBorderPanel(
+											createPanel(get(() -> {
+												faceLabelSelected = new FaceLabel();
+												return faceLabelSelected;
+											})),
+											get(() -> {
+												listHeroines = new JList<String>();
 												refreshHeroines();
-											});
-											listHeroines.addListSelectionListener(e -> {
-												String name = listHeroines.getSelectedValue();
-												if (name != null) {
-													if (name.equals("None")) {
-														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
+												RegistryHeroine.addListener(h -> {
+													refreshHeroines();
+												});
+												listHeroines.addListSelectionListener(e -> {
+													String name = listHeroines.getSelectedValue();
+													if (name != null) {
+														if (name.equals("None")) {
+															faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
+														} else {
+															faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
+														}
 													} else {
-														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
+														faceLabelSelected.setIcon(null);
 													}
-												} else {
-													faceLabelSelected.setIcon(null);
-												}
-											});
-											return createScrollPane(listHeroines, 120, 200);
-										}),
-										null),
-									get(() -> {
-										listButtleClass = new JList<String>();
-										listButtleClass.setListData(Stream.concat(
-											Stream.of("None"),
-											Stream.of(RegistryHeroine.getBattleClasses()))
-											.toArray(String[]::new));
-										return createScrollPane(listButtleClass, 120, 300);
-									})),
+												});
+												return createScrollPane(listHeroines, 120, 200);
+											}),
+											null),
+										get(() -> {
+											listButtleClass = new JList<String>();
+											listButtleClass.setListData(Stream.concat(
+												Stream.of("None"),
+												Stream.of(RegistryHeroine.getBattleClasses()))
+												.toArray(String[]::new));
+											return createScrollPane(listButtleClass, 120, 300);
+										})),
+									null),
 								null),
+								c -> {
+									c.setBorder(new BevelBorder(BevelBorder.LOWERED));
+									c.setOpaque(true);
+								}),
 							null),
 						null),
-					null)));
+					get(() -> {
+						labelStatusBar = new JLabel("");
+						setPreferredSize(labelStatusBar, 200, 1);
+						return labelStatusBar;
+					}))));
 
 			frameMain.pack();
 			frameMain.setLocationByPlatform(true);
@@ -343,6 +351,15 @@ public class GUNoelle
 		start();
 	}
 
+	protected void setStatusBar(String text)
+	{
+		labelStatusBar.setText(text);
+		labelStatusBar.setForeground(new Color(
+			(int) (Math.random() * 128),
+			(int) (Math.random() * 128),
+			(int) (Math.random() * 128)));
+	}
+
 	private void startSearch()
 	{
 		Thread thread = new Thread(() -> {
@@ -350,7 +367,7 @@ public class GUNoelle
 			int skipLimit = (Integer) spinnerSkipLimitMax.getValue();
 
 			SwingUtilities.invokeLater(() -> {
-				labelStatusSearch.setText("");
+				setStatusBar("");
 				labelSearching.setText("実行中");
 			});
 			try {
@@ -367,7 +384,7 @@ public class GUNoelle
 					// 最小化時に終わる
 					if (isIconified) {
 						SwingUtilities.invokeLater(() -> {
-							labelStatusSearch.setText("ツール画面が最小化されました。");
+							setStatusBar("ツール画面が最小化されました。");
 						});
 						break;
 					}
@@ -375,7 +392,7 @@ public class GUNoelle
 					// GU最小化時に終わる
 					if (gu == null) {
 						SwingUtilities.invokeLater(() -> {
-							labelStatusSearch.setText("GUの画面が最小化されました。");
+							setStatusBar("スクリーンを認識できません。");
 						});
 						break;
 					}
@@ -396,7 +413,7 @@ public class GUNoelle
 							.findAny()
 							.isPresent()) {
 							SwingUtilities.invokeLater(() -> {
-								labelStatusSearch.setText("指定のヒロインです。");
+								setStatusBar("指定のヒロインです。");
 							});
 							break;
 						}
@@ -408,7 +425,7 @@ public class GUNoelle
 							.findAny()
 							.isPresent()) {
 							SwingUtilities.invokeLater(() -> {
-								labelStatusSearch.setText("指定のクラスのヒロインです。");
+								setStatusBar("指定のクラスのヒロインです。");
 							});
 							break;
 						}
@@ -417,7 +434,7 @@ public class GUNoelle
 
 						if (skipLimit <= 0) { // 回数オーバー
 							SwingUtilities.invokeLater(() -> {
-								labelStatusSearch.setText("規定回数の検索が終了しました。");
+								setStatusBar("規定回数の検索が終了しました。");
 							});
 							break;
 						}
@@ -429,7 +446,7 @@ public class GUNoelle
 							Thread.sleep(500);
 						} catch (InterruptedException e1) {
 							SwingUtilities.invokeLater(() -> {
-								labelStatusSearch.setText("スレッドが中断されました。");
+								setStatusBar("スレッドが中断されました。");
 							});
 							break;
 						}
@@ -441,7 +458,7 @@ public class GUNoelle
 					// 飛ばすべきものでなく黒画像でもない状況で0.5秒経過
 					if (t > 500) {
 						SwingUtilities.invokeLater(() -> {
-							labelStatusSearch.setText("未知のヒロインです。");
+							setStatusBar("未知のヒロインです。");
 						});
 						break;
 					}
@@ -591,7 +608,7 @@ public class GUNoelle
 				faceLabelGuessed.setIcon(new ImageIcon(heroine.get().image));
 				int distance = heroine.get().getDistance(gu.imageFace);
 				boolean known = distance < 1500;
-				labelStatus.setText(String.format("<html><table>"
+				labelFaceParameters.setText(String.format("<html><table>"
 					+ "<tr><td>Name</td><td>%s</td></tr>"
 					+ "<tr><td>距離</td><td>%s</td></tr>"
 					+ "<tr><td>判定</td><td>%s</td></tr>"
@@ -607,7 +624,7 @@ public class GUNoelle
 
 			} else {
 				faceLabelGuessed.setIcon(null);
-				labelStatus.setText("");
+				labelFaceParameters.setText("");
 				this.heroine = null;
 				this.known = false;
 			}
@@ -619,7 +636,7 @@ public class GUNoelle
 			labelGUScreen.setIcon(null);
 			faceLabelTrimed.setIcon(null);
 			faceLabelGuessed.setIcon(null);
-			labelStatus.setText("");
+			labelFaceParameters.setText("");
 			gu = null;
 			this.heroine = null;
 			this.known = false;
@@ -670,6 +687,12 @@ public class GUNoelle
 	private static JSplitPane createVerticalSplitPane(Component component1, Component component2)
 	{
 		return new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, component1, component2);
+	}
+
+	private static <T> T process(T object, Consumer<T> consumer)
+	{
+		consumer.accept(object);
+		return object;
 	}
 
 	private static JPanel createVerticalBorderPanel(Component top, Component middle, Component bottom)
