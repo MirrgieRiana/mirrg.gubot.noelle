@@ -1,13 +1,14 @@
 ﻿# mirrg.gubot.noelle
 
-## Usage
+## 使用方法
 
-Run `repos/mirrg.gubot.noelle-*.jar`
+実行`repos/mirrg.gubot.noelle-*.jar`
 
-Or `mirrg.gubot.noelle/run.vbs` for Windows
+または`mirrg.gubot.noelle/run.vbs`（Windowsの場合）
 
 - 同ディレクトリに`data.csv`が必要。
 - 同ディレクトリに`faces`ディレクトリが生成される。
+- 同ディレクトリに`screenshots`ディレクトリが生成される。
 
 ## 機能
 
