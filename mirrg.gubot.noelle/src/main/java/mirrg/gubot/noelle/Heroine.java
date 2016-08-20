@@ -27,25 +27,29 @@ public class Heroine
 		HLog.fine("Saved as: " + file);
 	}
 
-	public int getDistance(BufferedImage image2)
+	public double getDistance(BufferedImage image2, double limit)
 	{
 		if (image.getWidth() != image2.getWidth()) return 99999999;
 		if (image.getHeight() != image2.getHeight()) return 99999999;
 		int t = 0;
+		int pixels = (image.getWidth() / 8) * (image.getHeight() / 8);
+
+		limit *= pixels;
 
 		for (int x = 0; x < image.getWidth(); x += 8) {
 			for (int y = 0; y < image.getHeight(); y += 8) {
 				int rgb = image.getRGB(x, y);
 				int rgb2 = image2.getRGB(x, y);
 
-				t += Math.abs(((rgb & 0xff0000) >> 16) - ((rgb2 & 0xff0000) >> 16));
-				t += Math.abs(((rgb & 0xff00) >> 8) - ((rgb2 & 0xff00) >> 8));
+				t += Math.abs(((rgb >> 16) & 0xff) - ((rgb2 >> 16) & 0xff));
+				t += Math.abs(((rgb >> 8) & 0xff) - ((rgb2 >> 8) & 0xff));
 				t += Math.abs((rgb & 0xff) - (rgb2 & 0xff));
 
+				if (t > limit) return 1.0 * t / pixels;
 			}
 		}
 
-		return t;
+		return 1.0 * t / pixels;
 	}
 
 	public String getButtleClass()
