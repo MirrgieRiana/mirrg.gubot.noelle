@@ -154,7 +154,7 @@ public class GUNoelle
 			});
 
 			{
-				JMenuBar menubar = new JMenuBar();
+				JMenuBar menuBar = new JMenuBar();
 				{
 					JMenu menu = new JMenu("ファイル");
 					JMenuItem menuItem = new JMenuItem("スクリーンショットフォルダを開く");
@@ -167,16 +167,16 @@ public class GUNoelle
 						}
 					});
 					menu.add(menuItem);
-					menubar.add(menu);
+					menuBar.add(menu);
 				}
-				menubar.add(createButton("ログ", e -> {
+				menuBar.add(createButton("ログ", e -> {
 					new FrameLog(500).setVisible(true);
 				}));
-				menubar.add(createButton("スクリーン", e -> {
+				menuBar.add(createButton("スクリーン", e -> {
 					dialogScreen.pack();
 					dialogScreen.setVisible(!dialogScreen.isVisible());
 				}));
-				menubar.add(createButton("スクショ", e -> {
+				menuBar.add(createButton("スクショ", e -> {
 					if (gu == null) {
 						setStatusBar("スクリーンが認識できませんでした。");
 						return;
@@ -196,7 +196,7 @@ public class GUNoelle
 
 					setStatusBar("スクショ保存：" + file);
 				}));
-				frameMain.setJMenuBar(menubar);
+				frameMain.setJMenuBar(menuBar);
 			}
 
 			frameMain.setLayout(new CardLayout());
