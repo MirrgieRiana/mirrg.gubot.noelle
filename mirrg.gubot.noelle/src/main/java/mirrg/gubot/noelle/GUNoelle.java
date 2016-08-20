@@ -1,14 +1,13 @@
 package mirrg.gubot.noelle;
 
+import static mirrg.gubot.noelle.HSwing.*;
+
 import java.awt.AWTException;
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Robot;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -16,17 +15,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -36,10 +30,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
@@ -48,7 +39,6 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
-import jp.hishidama.swing.layout.GroupLayoutUtil;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
@@ -703,127 +693,6 @@ public class GUNoelle
 		}
 	}
 
-	private static Component createHorizontalSplitPane(Component... components)
-	{
-		return createHorizontalSplitPane(Arrays.asList(components));
-	}
-
-	private static Component createHorizontalSplitPane(List<Component> components)
-	{
-		if (components.size() == 1) return components.get(0);
-		return new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
-			components.get(0),
-			createHorizontalSplitPane(components.subList(1, components.size())));
-	}
-
-	private static Component createVerticalSplitPane(Component... components)
-	{
-		return createVerticalSplitPane(Arrays.asList(components));
-	}
-
-	private static Component createVerticalSplitPane(List<Component> components)
-	{
-		if (components.size() == 1) return components.get(0);
-		return new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
-			components.get(0),
-			createVerticalSplitPane(components.subList(1, components.size())));
-	}
-
-	private static Component createBorderPanelUp(Component... components)
-	{
-		return createBorderPanelUp(Arrays.asList(components));
-	}
-
-	private static Component createBorderPanelUp(List<Component> components)
-	{
-		if (components.size() == 1) return components.get(0);
-		JPanel panel = new JPanel();
-
-		panel.setLayout(new BorderLayout(4, 4));
-		panel.add(components.get(0), BorderLayout.NORTH);
-		panel.add(createBorderPanelUp(components.subList(1, components.size())), BorderLayout.CENTER);
-
-		return panel;
-	}
-
-	private static Component createBorderPanelDown(Component... components)
-	{
-		return createBorderPanelDown(Arrays.asList(components));
-	}
-
-	private static Component createBorderPanelDown(List<Component> components)
-	{
-		if (components.size() == 1) return components.get(0);
-		JPanel panel = new JPanel();
-
-		panel.setLayout(new BorderLayout(4, 4));
-		panel.add(createBorderPanelDown(components.subList(0, components.size() - 1)), BorderLayout.CENTER);
-		panel.add(components.get(components.size() - 1), BorderLayout.SOUTH);
-
-		return panel;
-	}
-
-	private static Component createBorderPanelLeft(Component... components)
-	{
-		return createBorderPanelLeft(Arrays.asList(components));
-	}
-
-	private static Component createBorderPanelLeft(List<Component> components)
-	{
-		if (components.size() == 1) return components.get(0);
-		JPanel panel = new JPanel();
-
-		panel.setLayout(new BorderLayout(4, 4));
-		panel.add(components.get(0), BorderLayout.WEST);
-		panel.add(createBorderPanelLeft(components.subList(1, components.size())), BorderLayout.CENTER);
-
-		return panel;
-	}
-
-	private static Component createBorderPanelRight(Component... components)
-	{
-		return createBorderPanelRight(Arrays.asList(components));
-	}
-
-	private static Component createBorderPanelRight(List<Component> components)
-	{
-		if (components.size() == 1) return components.get(0);
-		JPanel panel = new JPanel();
-
-		panel.setLayout(new BorderLayout(4, 4));
-		panel.add(createBorderPanelRight(components.subList(0, components.size() - 1)), BorderLayout.CENTER);
-		panel.add(components.get(components.size() - 1), BorderLayout.EAST);
-
-		return panel;
-	}
-
-	private static JPanel createGridPanel(Component[][] grid)
-	{
-		JPanel panel = new JPanel();
-
-		GroupLayoutUtil g = new GroupLayoutUtil();
-		g.setComponents(grid);
-		g.setGroupLayoutTo(panel);
-
-		return panel;
-	}
-
-	private static <T> T process(T object, Consumer<T> consumer)
-	{
-		consumer.accept(object);
-		return object;
-	}
-
-	private static <T> T get(Supplier<T> supplier)
-	{
-		return supplier.get();
-	}
-
-	private static void setPreferredSize(JLabel label, int width, int rows)
-	{
-		label.setPreferredSize(new Dimension(width, label.getFont().getSize() * rows + 6));
-	}
-
 	private static class FaceLabel extends ScreenLabel
 	{
 
@@ -847,41 +716,6 @@ public class GUNoelle
 			setOpaque(true);
 		}
 
-	}
-
-	private static JPanel createPanel(Consumer<JPanel> initializer)
-	{
-		JPanel panel = new JPanel();
-		initializer.accept(panel);
-		return panel;
-	}
-
-	private static JPanel createPanel(Component... components)
-	{
-		JPanel panel = new JPanel();
-		Stream.of(components)
-			.forEach(panel::add);
-		return panel;
-	}
-
-	private static JButton createButton(String caption, ActionListener listener)
-	{
-		JButton button = new JButton(caption);
-		button.addActionListener(listener);
-		return button;
-	}
-
-	private static JScrollPane createScrollPane(Component component)
-	{
-		JScrollPane scrollPane = new JScrollPane(component);
-		return scrollPane;
-	}
-
-	private static JScrollPane createScrollPane(Component component, int width, int height)
-	{
-		JScrollPane scrollPane = new JScrollPane(component);
-		scrollPane.setPreferredSize(new Dimension(width, height));
-		return scrollPane;
 	}
 
 }
