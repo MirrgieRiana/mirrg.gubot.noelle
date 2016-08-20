@@ -33,7 +33,9 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -153,6 +155,20 @@ public class GUNoelle
 
 			{
 				JMenuBar menubar = new JMenuBar();
+				{
+					JMenu menu = new JMenu("ファイル");
+					JMenuItem menuItem = new JMenuItem("スクリーンショットフォルダを開く");
+					menuItem.addActionListener(e -> {
+						Runtime runtime = Runtime.getRuntime();
+						try {
+							runtime.exec("explorer \"" + new File("screenshots").getAbsolutePath() + "\"");
+						} catch (IOException e2) {
+							HLog.processException(e2);
+						}
+					});
+					menu.add(menuItem);
+					menubar.add(menu);
+				}
 				menubar.add(createButton("ログ", e -> {
 					new FrameLog(500).setVisible(true);
 				}));
