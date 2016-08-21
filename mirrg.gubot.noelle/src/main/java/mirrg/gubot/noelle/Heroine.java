@@ -12,12 +12,19 @@ public class Heroine
 {
 
 	public BufferedImage image;
+	public BufferedImage imageToMatch;
 	public String name;
 
 	public Heroine(BufferedImage image, String name)
 	{
 		this.image = image;
+		this.imageToMatch = getImageToMatch(image);
 		this.name = name;
+	}
+
+	public static BufferedImage getImageToMatch(BufferedImage image)
+	{
+		return Helpers.copyNormalize(Helpers.copyStep(image, 2));
 	}
 
 	public void save() throws IOException
@@ -27,19 +34,19 @@ public class Heroine
 		HLog.fine("Saved as: " + file);
 	}
 
-	public double getDistance(BufferedImage image2, double limit)
+	public double getDistance(BufferedImage imageToMatch2, double limit)
 	{
-		if (image.getWidth() != image2.getWidth()) return 99999999;
-		if (image.getHeight() != image2.getHeight()) return 99999999;
+		if (imageToMatch.getWidth() != imageToMatch2.getWidth()) return 99999999;
+		if (imageToMatch.getHeight() != imageToMatch2.getHeight()) return 99999999;
 		int t = 0;
-		int pixels = (image.getWidth() / 8) * (image.getHeight() / 8);
+		int pixels = imageToMatch.getWidth() * imageToMatch.getHeight();
 
 		limit *= pixels;
 
-		for (int x = 0; x < image.getWidth(); x += 8) {
-			for (int y = 0; y < image.getHeight(); y += 8) {
-				int rgb = image.getRGB(x, y);
-				int rgb2 = image2.getRGB(x, y);
+		for (int x = 0; x < imageToMatch.getWidth(); x++) {
+			for (int y = 0; y < imageToMatch.getHeight(); y++) {
+				int rgb = imageToMatch.getRGB(x, y);
+				int rgb2 = imageToMatch2.getRGB(x, y);
 
 				t += Math.abs(((rgb >> 16) & 0xff) - ((rgb2 >> 16) & 0xff));
 				t += Math.abs(((rgb >> 8) & 0xff) - ((rgb2 >> 8) & 0xff));

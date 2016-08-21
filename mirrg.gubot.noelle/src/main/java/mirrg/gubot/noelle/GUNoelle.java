@@ -585,7 +585,9 @@ public class GUNoelle
 				labelSelecting.setText(String.format("Distance: %s , %s",
 					String.format("%.4f", guScreen.get().getDistanceSelecting()).substring(0, 6),
 					isSelecting ? "選択中" : "非選択中"));
-				faceLabelTrimed.setIcon(new ImageIcon(guScreen.get().getImageFace()));
+				BufferedImage imageFace = guScreen.get().getImageFace();
+				BufferedImage imageFaceToMatch = Heroine.getImageToMatch(imageFace);
+				faceLabelTrimed.setIcon(new ImageIcon(imageFace));
 
 				// ★領地選択画面である場合常時更新
 				if (isSelecting) {
@@ -594,7 +596,7 @@ public class GUNoelle
 					Optional<Tuple<Heroine, Double>> heroin2;
 					{
 						ArrayList<Tuple<Heroine, Double>> heroins = RegistryHeroine.getHeroines()
-							.map(h -> new Tuple<>(h, h.getDistance(guScreen.get().getImageFace(), 15)))
+							.map(h -> new Tuple<>(h, h.getDistance(imageFaceToMatch, 15)))
 							//.filter(h -> h.getY() < 15)
 							.sorted((a, b) -> (int) Math.signum(a.getY() - b.getY()))
 							.collect(Collectors.toCollection(ArrayList::new));
