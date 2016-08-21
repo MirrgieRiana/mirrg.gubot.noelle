@@ -97,6 +97,7 @@ public class GUNoelle
 	protected JLabel labelGUScreen;
 
 	protected volatile Optional<GUScreen> guScreen = Optional.empty();
+	protected volatile boolean isSelecting;
 	protected volatile Optional<Heroine> heroine;
 	protected volatile boolean known;
 
@@ -404,30 +405,24 @@ public class GUNoelle
 					}
 					t += 20;
 
-					// 最小化時に終わる
+					// Noelle最小化時に終わる
 					if (isIconified) {
 						SwingUtilities.invokeLater(() -> {
 							setStatusBar("ツール画面が最小化されました。");
 						});
-						break;
+						return;
 					}
 
-					// GU最小化時に終わる
+					// GUを見失ったら終わる
 					if (!guScreen.isPresent()) {
 						SwingUtilities.invokeLater(() -> {
 							setStatusBar("スクリーンを認識できません。");
 						});
-						break;
+						return;
 					}
 
-					// 黒背景
-					if (isBlankProvided()) {
-						t = 0;
-						continue;
-					}
-
-					// 既知ヒロイン（＝飛ばすべきもの）が居た場合
-					if (isKnownHeroineProvided()) {
+					// 既知ヒロインが居た場合
+					if (known && !heroine.get().name.equals("黒")) {
 
 						// キャッチヒロインに指定されている場合終了
 						if (listHeroines.getSelectedValuesList().stream()
@@ -438,7 +433,7 @@ public class GUNoelle
 							SwingUtilities.invokeLater(() -> {
 								setStatusBar("指定のヒロインです。");
 							});
-							break;
+							return;
 						}
 
 						// キャッチクラスに指定されている場合終了
@@ -450,40 +445,64 @@ public class GUNoelle
 							SwingUtilities.invokeLater(() -> {
 								setStatusBar("指定のクラスのヒロインです。");
 							});
-							break;
+							return;
 						}
 
 						// 飛ばしてよい
 
-						if (skipLimit <= 0) { // 回数オーバー
+						// 回数オーバーなら終了
+						if (skipLimit <= 0) {
 							SwingUtilities.invokeLater(() -> {
 								setStatusBar("規定回数の検索が終了しました。");
 							});
-							break;
+							return;
 						}
-						skipLimit--;
 
-						guScreen.get().next();
+						// 飛ばす
+						{
+							skipLimit--;
 
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e1) {
-							SwingUtilities.invokeLater(() -> {
-								setStatusBar("スレッドが中断されました。");
-							});
-							break;
+							guScreen.get().next();
+
+							try {
+								Thread.sleep(500);
+							} catch (InterruptedException e1) {
+								SwingUtilities.invokeLater(() -> {
+									setStatusBar("スレッドが中断されました。");
+								});
+								return;
+							}
 						}
 
 						t = 0;
 						continue;
 					}
 
-					// 飛ばすべきものでなく黒画像でもない状況で0.5秒経過
+					// 黒背景
+					if (known && heroine.get().name.equals("黒")) {
+						t = 0;
+						continue;
+					}
+
+					// 0.5秒経過
 					if (t > 500) {
-						SwingUtilities.invokeLater(() -> {
-							setStatusBar("未知のヒロインです。");
-						});
-						break;
+						if (isSelecting) {
+
+							// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
+							SwingUtilities.invokeLater(() -> {
+								setStatusBar("未知のヒロインです。");
+							});
+							return;
+
+						} else {
+
+							// 非選択中
+							SwingUtilities.invokeLater(() -> {
+								setStatusBar("領地選択画面から離れました。");
+							});
+							return;
+
+						}
 					}
 
 				}
@@ -593,7 +612,7 @@ public class GUNoelle
 
 		// ★GU画面がある場合常時更新
 		if (guScreen.isPresent()) {
-			boolean isSelecting = guScreen.get().isSelecting();
+			isSelecting = guScreen.get().isSelecting();
 
 			// 領地選択画面か否か
 			labelSelecting.setText(String.format("Distance: %s , %s",
@@ -664,16 +683,6 @@ public class GUNoelle
 		}
 
 		frameMain.repaint();
-	}
-
-	protected boolean isKnownHeroineProvided()
-	{
-		return heroine.isPresent() && known && !heroine.get().name.equals("黒");
-	}
-
-	protected boolean isBlankProvided()
-	{
-		return heroine.isPresent() && known && heroine.get().name.equals("黒");
 	}
 
 	public static void prepareDirectory(File dir)
