@@ -1,7 +1,5 @@
 package mirrg.gubot.noelle.screen;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -36,8 +34,7 @@ public class FactoryGUScreen
 		ResponseFind response = new ResponseFind();
 
 		// 全画面スクショ
-		Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-		BufferedImage image = GUNoelle.createScreenCapture(0, 0, size.width, size.height);
+		BufferedImage image = GUNoelle.createScreenCapture();
 
 		int screenH = image.getHeight();
 		int screenW = image.getWidth();

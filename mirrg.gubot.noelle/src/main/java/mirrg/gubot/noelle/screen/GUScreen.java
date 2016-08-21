@@ -29,6 +29,7 @@ public abstract class GUScreen
 	protected int width;
 	protected int height;
 
+	protected BufferedImage image;
 	protected BufferedImage imageFace;
 	protected BufferedImage imageSelecting;
 
@@ -40,7 +41,13 @@ public abstract class GUScreen
 		this.height = height;
 	}
 
-	public abstract BufferedImage getImage();
+	public abstract BufferedImage getImageBordered();
+
+	public BufferedImage getImage()
+	{
+		if (image == null) image = getImageBordered().getSubimage(1, 1, width, height);
+		return image;
+	}
 
 	public BufferedImage getImageFace()
 	{
@@ -112,7 +119,7 @@ public abstract class GUScreen
 	 *            0~255
 	 * @return Math.max(diff / (lower safe length) - 1, 0)
 	 */
-	protected static double getWeightedDiff(double a, double b, int alpha)
+	private static double getWeightedDiff(double a, double b, int alpha)
 	{
 		if (a > b) {
 			double diff = a - b;
@@ -127,34 +134,23 @@ public abstract class GUScreen
 		}
 	}
 
-	protected abstract BufferedImage getScreenCapture(int x, int y, int width, int height);
-
 	public boolean validate()
 	{
-		BufferedImage image;
+		BufferedImage image = getImageBordered();
 
-		image = getScreenCapture(screenX - 1, screenY - 1, width + 2, 1);
-		if (!isAllBlack(image)) return false;
-
-		image = getScreenCapture(screenX - 1, screenY + height, width + 2, 1);
-		if (!isAllBlack(image)) return false;
-
-		image = getScreenCapture(screenX - 1, screenY - 1, 1, height + 2);
-		if (!isAllBlack(image)) return false;
-
-		image = getScreenCapture(screenX + width, screenY - 1, 1, height + 2);
-		if (!isAllBlack(image)) return false;
+		if (!isAllBlack(image, 0, 0, width + 2, 1)) return false;
+		if (!isAllBlack(image, 0, height + 1, width + 2, 1)) return false;
+		if (!isAllBlack(image, 0, 0, 1, height + 2)) return false;
+		if (!isAllBlack(image, width + 1, 0, 1, height + 2)) return false;
 
 		return true;
 	}
 
-	private static boolean isAllBlack(BufferedImage image)
+	private static boolean isAllBlack(BufferedImage image, int x, int y, int width, int height)
 	{
-		int width = image.getWidth();
-		int height = image.getHeight();
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if ((image.getRGB(x, y) & 0xffffff) != 0) {
+		for (int x2 = x; x2 < x + width; x2 += 5) {
+			for (int y2 = y; y2 < y + height; y2 += 5) {
+				if ((image.getRGB(x2, y2) & 0xffffff) != 0) {
 					return false;
 				}
 			}

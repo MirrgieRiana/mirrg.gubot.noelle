@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -401,11 +403,11 @@ public class GUNoelle
 					labelSkipLimit.setText("" + skipLimit);
 
 					try {
-						Thread.sleep(20);
+						Thread.sleep(15);
 					} catch (InterruptedException e1) {
 						return;
 					}
-					t += 20;
+					t += 15;
 
 					// Noelle最小化時に終わる
 					if (isIconified) {
@@ -555,21 +557,99 @@ public class GUNoelle
 	public void start()
 	{
 		if (thread != null) return;
-		thread = new Thread(() -> {
-			long time = System.currentTimeMillis();
-			while (true) {
+		thread = new ThreadWatchScreen(r -> {
 
-				if (!isIconified) update();
+			// ★find時にのみ更新
+			{
+				listBlackPixels.setListData(r.islands.stream()
+					.sorted((a, b) -> b.pixels - a.pixels)
+					.filter(a -> a.pixels >= 10)
+					.map(Island::toString)
+					.toArray(String[]::new));
 
-				long time2 = System.currentTimeMillis();
-				long waitMs = Math.max(time + 20 - time2, 0);
-				try {
-					Thread.sleep(waitMs);
-				} catch (InterruptedException e) {
-					break;
+				if (guScreen.isPresent()) {
+					labelGUFound.setText(r.island.get().toString());
+				} else {
+					labelGUFound.setText("Not found");
 				}
-				time = System.currentTimeMillis();
 			}
+
+		}, () -> {
+
+			// ★GU画面がある場合常時更新
+			if (guScreen.isPresent()) {
+				isSelecting = guScreen.get().isSelecting();
+
+				// 領地選択画面か否か
+				labelSelecting.setText(String.format("Distance: %s , %s",
+					String.format("%.4f", guScreen.get().getDistanceSelecting()).substring(0, 6),
+					isSelecting ? "選択中" : "非選択中"));
+				faceLabelTrimed.setIcon(new ImageIcon(guScreen.get().getImageFace()));
+
+				// ★領地選択画面である場合常時更新
+				if (isSelecting) {
+
+					// ヒロイン候補があるかどうか
+					Optional<Tuple<Heroine, Double>> heroin2;
+					{
+						ArrayList<Tuple<Heroine, Double>> heroins = RegistryHeroine.getHeroines()
+							.map(h -> new Tuple<>(h, h.getDistance(guScreen.get().getImageFace(), 15)))
+							//.filter(h -> h.getY() < 15)
+							.sorted((a, b) -> (int) Math.signum(a.getY() - b.getY()))
+							.collect(Collectors.toCollection(ArrayList::new));
+						heroin2 = heroins.stream()
+							.findFirst();
+
+						heroine = heroin2.map(Tuple::getX);
+					}
+
+					// ★最有力候補のヒロインについて常時更新
+					if (heroin2.isPresent()) {
+						faceLabelGuessed.setIcon(new ImageIcon(heroine.get().image));
+
+						// このヒロインについて既知といえるか
+						double distance = heroin2.get().getY();
+						known = distance < 15;
+						labelFaceParameters.setText(String.format("<html><table>"
+							+ "<tr><td>Name</td><td>%s</td></tr>"
+							+ "<tr><td>距離</td><td>%.6f</td></tr>"
+							+ "<tr><td>判定</td><td>%s</td></tr>"
+							+ "<tr><td>クラス</td><td>%s</td></tr>"
+							+ "</table></html>",
+							heroine.get().name,
+							distance,
+							known ? "既知" : "未知",
+							heroine.get().getButtleClass()));
+
+					} else {
+						faceLabelGuessed.setIcon(null);
+						known = false;
+						labelFaceParameters.setText("");
+					}
+				} else {
+					heroine = Optional.empty();
+					faceLabelGuessed.setIcon(null);
+					known = false;
+					labelFaceParameters.setText("");
+				}
+			} else {
+				labelSelecting.setText("No Screen");
+				faceLabelTrimed.setIcon(null);
+				heroine = Optional.empty();
+				faceLabelGuessed.setIcon(null);
+				known = false;
+				labelFaceParameters.setText("");
+			}
+
+			// ★スクリーンダイアログが出ている間常時更新
+			if (guScreen.isPresent()) {
+				if (dialogScreen.isVisible()) labelGUScreen.setIcon(new ImageIcon(guScreen.get().getImage()));
+			} else {
+				if (dialogScreen.isVisible()) labelGUScreen.setIcon(null);
+			}
+
+			frameMain.repaint();
+
 		});
 		thread.setDaemon(true);
 		thread.start();
@@ -582,113 +662,68 @@ public class GUNoelle
 		thread = null;
 	}
 
-	protected void update()
+	public class ThreadWatchScreen extends Thread
 	{
-		label1:
+
+		private Consumer<ResponseFind> onFind;
+		private Runnable onScreenUpdate;
+
+		public ThreadWatchScreen(Consumer<ResponseFind> onFind, Runnable onScreenUpdate)
 		{
-
-			// 前回既に取得している場合はvalidateだけして島判定をスルー
-			if (guScreen.isPresent()) {
-				guScreen = FactoryGUScreen.fromOld(guScreen.get());
-				if (guScreen.isPresent()) {
-					break label1;
-				}
-			}
-
-			// 新規にGU画面を取得
-			ResponseFind response = FactoryGUScreen.find(width, height);
-			guScreen = response.guScreen;
-
-			// ★find時にのみ更新
-			{
-				listBlackPixels.setListData(response.islands.stream()
-					.sorted((a, b) -> b.pixels - a.pixels)
-					.filter(a -> a.pixels >= 10)
-					.map(Island::toString)
-					.toArray(String[]::new));
-
-				if (guScreen.isPresent()) {
-					labelGUFound.setText(response.island.get().toString());
-				} else {
-					labelGUFound.setText("Not found");
-				}
-			}
-
+			this.onFind = onFind;
+			this.onScreenUpdate = onScreenUpdate;
 		}
 
-		// ★GU画面がある場合常時更新
-		if (guScreen.isPresent()) {
-			isSelecting = guScreen.get().isSelecting();
+		@Override
+		public void run()
+		{
+			long time = System.currentTimeMillis();
+			while (true) {
 
-			// 領地選択画面か否か
-			labelSelecting.setText(String.format("Distance: %s , %s",
-				String.format("%.4f", guScreen.get().getDistanceSelecting()).substring(0, 6),
-				isSelecting ? "選択中" : "非選択中"));
-			faceLabelTrimed.setIcon(new ImageIcon(guScreen.get().getImageFace()));
+				if (!isIconified) {
 
-			// ★領地選択画面である場合常時更新
-			if (isSelecting) {
+					label1:
+					{
 
-				// ヒロイン候補があるかどうか
-				Optional<Tuple<Heroine, Double>> heroin2;
-				{
-					ArrayList<Tuple<Heroine, Double>> heroins = RegistryHeroine.getHeroines()
-						.map(h -> new Tuple<>(h, h.getDistance(guScreen.get().getImageFace(), 15)))
-						//.filter(h -> h.getY() < 15)
-						.sorted((a, b) -> (int) Math.signum(a.getY() - b.getY()))
-						.collect(Collectors.toCollection(ArrayList::new));
-					heroin2 = heroins.stream()
-						.findFirst();
+						// 前回既に取得している場合はvalidateだけして島判定をスルー
+						if (guScreen.isPresent()) {
+							guScreen = FactoryGUScreen.fromOld(guScreen.get());
+							if (guScreen.isPresent()) {
+								break label1;
+							}
+						}
 
-					heroine = heroin2.map(Tuple::getX);
+						// 新規にGU画面を取得
+						ResponseFind response = FactoryGUScreen.find(width, height);
+						guScreen = response.guScreen;
+
+						Thread thread2 = new Thread(() -> {
+							onFind.accept(response);
+						});
+						thread2.setDaemon(true);
+						thread2.start();
+
+					}
+
+					Thread thread2 = new Thread(() -> {
+						onScreenUpdate.run();
+					});
+					thread2.setDaemon(true);
+					thread2.start();
+
 				}
 
-				// ★最有力候補のヒロインについて常時更新
-				if (heroin2.isPresent()) {
-					faceLabelGuessed.setIcon(new ImageIcon(heroine.get().image));
-
-					// このヒロインについて既知といえるか
-					double distance = heroin2.get().getY();
-					known = distance < 15;
-					labelFaceParameters.setText(String.format("<html><table>"
-						+ "<tr><td>Name</td><td>%s</td></tr>"
-						+ "<tr><td>距離</td><td>%.6f</td></tr>"
-						+ "<tr><td>判定</td><td>%s</td></tr>"
-						+ "<tr><td>クラス</td><td>%s</td></tr>"
-						+ "</table></html>",
-						heroine.get().name,
-						distance,
-						known ? "既知" : "未知",
-						heroine.get().getButtleClass()));
-
-				} else {
-					faceLabelGuessed.setIcon(null);
-					known = false;
-					labelFaceParameters.setText("");
+				long time2 = System.currentTimeMillis();
+				long waitMs = Math.max(time + 15 - time2, 0);
+				try {
+					Thread.sleep(waitMs);
+				} catch (InterruptedException e) {
+					break;
 				}
-			} else {
-				heroine = Optional.empty();
-				faceLabelGuessed.setIcon(null);
-				known = false;
-				labelFaceParameters.setText("");
+				time = System.currentTimeMillis();
 			}
-		} else {
-			labelSelecting.setText("No Screen");
-			faceLabelTrimed.setIcon(null);
-			heroine = Optional.empty();
-			faceLabelGuessed.setIcon(null);
-			known = false;
-			labelFaceParameters.setText("");
 		}
 
-		// ★スクリーンダイアログが出ている間常時更新
-		if (guScreen.isPresent()) {
-			if (dialogScreen.isVisible()) labelGUScreen.setIcon(new ImageIcon(guScreen.get().getImage()));
-		} else {
-			if (dialogScreen.isVisible()) labelGUScreen.setIcon(null);
-		}
-
-		frameMain.repaint();
 	}
 
 	public static void prepareDirectory(File dir)
@@ -739,6 +774,12 @@ public class GUNoelle
 	public static BufferedImage createScreenCapture(int x, int y, int width, int height)
 	{
 		return ROBOT.createScreenCapture(new Rectangle(x, y, width, height));
+	}
+
+	public static BufferedImage createScreenCapture()
+	{
+		Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+		return createScreenCapture(0, 0, size.width, size.height);
 	}
 
 }
