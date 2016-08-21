@@ -376,6 +376,7 @@ public class GUNoelle
 			dialogScreen.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		}
 
+		initThreadUpdateEvent();
 		start();
 	}
 
@@ -567,7 +568,7 @@ public class GUNoelle
 					.map(Island::toString)
 					.toArray(String[]::new));
 
-				if (guScreen.isPresent()) {
+				if (r.guScreen.isPresent()) {
 					labelGUFound.setText(r.island.get().toString());
 				} else {
 					labelGUFound.setText("Not found");
@@ -653,6 +654,7 @@ public class GUNoelle
 		});
 		thread.setDaemon(true);
 		thread.start();
+
 	}
 
 	protected void stop()
@@ -660,6 +662,49 @@ public class GUNoelle
 		if (thread == null) return;
 		thread.interrupt();
 		thread = null;
+	}
+
+	private volatile Thread threadUpdateEvent;
+	private volatile ArrayList<Runnable> updateEvents = new ArrayList<>();
+	private volatile Object lockUpdateEvent = new Object();
+	private volatile boolean isUpdateEventProcessing;
+
+	private void initThreadUpdateEvent()
+	{
+		threadUpdateEvent = new Thread(() -> {
+			while (true) {
+				ArrayList<Runnable> updateEvents2;
+				synchronized (this) {
+					updateEvents2 = updateEvents;
+					updateEvents = new ArrayList<>();
+				}
+
+				if (updateEvents2.size() > 0) {
+					updateEvents2.forEach(Runnable::run);
+				} else {
+					synchronized (lockUpdateEvent) {
+						isUpdateEventProcessing = false;
+						try {
+							lockUpdateEvent.wait();
+						} catch (InterruptedException e) {
+							break;
+						} finally {
+							isUpdateEventProcessing = true;
+						}
+					}
+				}
+			}
+		});
+		threadUpdateEvent.setDaemon(true);
+		threadUpdateEvent.start();
+	}
+
+	private synchronized void addUpdate(Runnable runnable)
+	{
+		updateEvents.add(runnable);
+		synchronized (lockUpdateEvent) {
+			lockUpdateEvent.notify();
+		}
 	}
 
 	public class ThreadWatchScreen extends Thread
@@ -681,13 +726,14 @@ public class GUNoelle
 			while (true) {
 
 				if (!isIconified) {
+					Optional<GUScreen> guScreen;
 
 					label1:
 					{
 
 						// 前回既に取得している場合はvalidateだけして島判定をスルー
-						if (guScreen.isPresent()) {
-							guScreen = FactoryGUScreen.fromOld(guScreen.get());
+						if (GUNoelle.this.guScreen.isPresent()) {
+							guScreen = FactoryGUScreen.fromOld(GUNoelle.this.guScreen.get());
 							if (guScreen.isPresent()) {
 								break label1;
 							}
@@ -697,19 +743,30 @@ public class GUNoelle
 						ResponseFind response = FactoryGUScreen.find(width, height);
 						guScreen = response.guScreen;
 
-						Thread thread2 = new Thread(() -> {
+						while (isUpdateEventProcessing) {
+							try {
+								Thread.sleep(1);
+							} catch (InterruptedException e) {
+								break;
+							}
+						}
+
+						addUpdate(() -> {
 							onFind.accept(response);
 						});
-						thread2.setDaemon(true);
-						thread2.start();
 
 					}
 
-					Thread thread2 = new Thread(() -> {
-						onScreenUpdate.run();
-					});
-					thread2.setDaemon(true);
-					thread2.start();
+					while (isUpdateEventProcessing) {
+						try {
+							Thread.sleep(1);
+						} catch (InterruptedException e) {
+							break;
+						}
+					}
+
+					GUNoelle.this.guScreen = guScreen;
+					addUpdate(onScreenUpdate);
 
 				}
 

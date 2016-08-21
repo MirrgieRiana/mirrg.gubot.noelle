@@ -20,7 +20,7 @@ import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
 public class RegistryHeroine
 {
 
-	public static final Pattern PATTERN_FILENAME_BODY = Pattern.compile("(.*)\\.[^.]*");
+	public static final Pattern PATTERN_FILENAME_BODY = Pattern.compile("(.*)\\.([^.]*)");
 
 	public static void init()
 	{
@@ -31,15 +31,15 @@ public class RegistryHeroine
 
 		// 画像取得
 		Stream.of(dir.listFiles())
-			.forEach(file -> {
-				Matcher matcher = PATTERN_FILENAME_BODY.matcher(file.getName());
+			.forEach(f -> {
+				Matcher matcher = PATTERN_FILENAME_BODY.matcher(f.getName());
 				if (matcher.matches()) {
 
 					try {
-						add(new Heroine(ImageIO.read(file), matcher.group(1)));
+						add(new Heroine(ImageIO.read(f), matcher.group(1)));
 					} catch (IOException e) {
 						HLog.processException(e);
-						//throw new RuntimeException(e);
+						throw new RuntimeException(e);
 					}
 
 				}
