@@ -629,6 +629,80 @@ public class GUNoelle
 						known = false;
 						labelFaceParameters.setText("");
 					}
+
+					// 経験値文字列取得
+					/*
+					{
+						int LEFT = 20;
+						int LINE_HEIGHT = 21;
+						int x = LEFT;
+						int y = 123;
+
+						ArrayList<String> lines = new ArrayList<>();
+
+						while (true) { // lines
+							String line = "";
+
+							// 下端
+							if (y + LINE_HEIGHT >= height) break;
+
+							while (true) { // fonts
+								int x2 = x;
+								int y2 = y;
+								Optional<Tuple3<Tuple<String, BufferedImage>, Integer, Double>> font = RegistryFont.getFonts()
+									.flatMap(f -> {
+
+										// 右端
+										if (x2 + 2 + f.getY().getWidth() >= guScreen.get().getImage().getWidth()) return Stream.empty();
+
+										/*
+										if (f.getX().equals("2")) { // TODO
+											aaa.setIcon(new ImageIcon(f.getY()));
+											bbb.setIcon(new ImageIcon(guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight())));
+										}
+										* /
+
+										return Stream.of(
+											new Tuple3<>(f, -1, Helpers.getDistance(
+												f.getY(),
+												guScreen.get().getImage().getSubimage(x2 - 1 - 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight()), 1)),
+											new Tuple3<>(f, 0, Helpers.getDistance(
+												f.getY(),
+												guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight()), 1)),
+											new Tuple3<>(f, 1, Helpers.getDistance(
+												f.getY(),
+												guScreen.get().getImage().getSubimage(x2 - 1 + 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight()), 1)));
+									})
+									.min((a, b) -> (int) Math.signum(a.getZ() - b.getZ()));
+
+								if (font.isPresent()) {
+									if (font.get().getZ() < 100) {
+										// あった
+										line += font.get().getX().getX();
+										x += font.get().getX().getY().getWidth() - 2;
+										x += font.get().getY();
+										continue;
+									}
+								}
+
+								// なかった
+								x = LEFT;
+								y += LINE_HEIGHT;
+								break;
+							}
+
+							if (line.isEmpty()) break;
+
+							lines.add(line);
+						}
+
+						System.out.println("#############################"); // TODO
+						lines.stream()
+							.forEach(System.out::println);
+						// TODO
+					}
+					*/
+
 				} else {
 					heroine = Optional.empty();
 					faceLabelGuessed.setIcon(null);
@@ -670,9 +744,25 @@ public class GUNoelle
 	private volatile ArrayList<Runnable> updateEvents = new ArrayList<>();
 	private volatile Object lockUpdateEvent = new Object();
 	private volatile boolean isUpdateEventProcessing;
+	/*
+	private JLabel aaa;
+	private JLabel bbb;
+	*/
 
 	private void initThreadUpdateEvent()
 	{
+		//TODO
+		/*
+		JFrame frame = new JFrame();
+		aaa = new JLabel();
+		aaa.setPreferredSize(new Dimension(200, 30));
+		bbb = new JLabel();
+		bbb.setPreferredSize(new Dimension(200, 30));
+		frame.add(createVerticalSplitPane(aaa, bbb));
+		frame.pack();
+		frame.setVisible(true);
+		*/
+		//TODO
 		threadUpdateEvent = new Thread(() -> {
 			while (true) {
 				ArrayList<Runnable> updateEvents2;
