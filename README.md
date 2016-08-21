@@ -2,7 +2,12 @@
 
 ## 使用方法
 
-実行`repos/mirrg.gubot.noelle-*.jar`
+実行
+
+```
+cd mirrg.gubot.noelle
+java -jar ../repos/mirrg.gubot.noelle-*.*.*.jar
+```
 
 または`mirrg.gubot.noelle/run.vbs`（Windowsの場合）
 
