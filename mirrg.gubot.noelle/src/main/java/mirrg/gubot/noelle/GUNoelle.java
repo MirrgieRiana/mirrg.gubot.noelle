@@ -733,6 +733,9 @@ public class GUNoelle
 
 	}
 
+	/**
+	 * 小さい領域でも60Hzでしか呼び出せない。全画面を取得する場合30Hzに下がる。
+	 */
 	public static BufferedImage createScreenCapture(int x, int y, int width, int height)
 	{
 		return ROBOT.createScreenCapture(new Rectangle(x, y, width, height));
