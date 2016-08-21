@@ -8,10 +8,10 @@ public class GUScreenFromFind extends GUScreen
 	protected BufferedImage imageScreen;
 	protected BufferedImage image;
 
-	protected GUScreenFromFind(int screenX, int screenY, int width, int height, BufferedImage imageDisplay)
+	protected GUScreenFromFind(int screenX, int screenY, int width, int height, BufferedImage imageScreen)
 	{
 		super(screenX, screenY, width, height);
-		this.imageScreen = imageDisplay;
+		this.imageScreen = imageScreen;
 	}
 
 	@Override
