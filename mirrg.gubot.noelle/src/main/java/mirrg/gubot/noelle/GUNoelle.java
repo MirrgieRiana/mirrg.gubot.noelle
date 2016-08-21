@@ -7,9 +7,11 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -554,15 +556,19 @@ public class GUNoelle
 	{
 		if (thread != null) return;
 		thread = new Thread(() -> {
+			long time = System.currentTimeMillis();
 			while (true) {
 
 				if (!isIconified) update();
 
+				long time2 = System.currentTimeMillis();
+				long waitMs = Math.max(time + 20 - time2, 0);
 				try {
-					Thread.sleep(20);
+					Thread.sleep(waitMs);
 				} catch (InterruptedException e) {
 					break;
 				}
+				time = System.currentTimeMillis();
 			}
 		});
 		thread.setDaemon(true);
@@ -725,6 +731,11 @@ public class GUNoelle
 			setOpaque(true);
 		}
 
+	}
+
+	public static BufferedImage createScreenCapture(int x, int y, int width, int height)
+	{
+		return ROBOT.createScreenCapture(new Rectangle(x, y, width, height));
 	}
 
 }

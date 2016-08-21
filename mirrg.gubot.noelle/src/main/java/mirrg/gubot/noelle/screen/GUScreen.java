@@ -29,6 +29,9 @@ public abstract class GUScreen
 	protected int width;
 	protected int height;
 
+	protected BufferedImage imageFace;
+	protected BufferedImage imageSelecting;
+
 	protected GUScreen(int screenX, int screenY, int width, int height)
 	{
 		this.screenX = screenX;
@@ -39,9 +42,17 @@ public abstract class GUScreen
 
 	public abstract BufferedImage getImage();
 
-	public abstract BufferedImage getImageFace();
+	public BufferedImage getImageFace()
+	{
+		if (imageFace == null) imageFace = getImage().getSubimage(15, 24, 64, 64);
+		return imageFace;
+	}
 
-	public abstract BufferedImage getImageSelecting();
+	public BufferedImage getImageSelecting()
+	{
+		if (imageSelecting == null) imageSelecting = getImage().getSubimage(584, 366, 184, 64);
+		return imageSelecting;
+	}
 
 	public void next()
 	{
