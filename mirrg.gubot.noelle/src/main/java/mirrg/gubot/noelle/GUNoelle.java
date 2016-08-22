@@ -596,8 +596,8 @@ public class GUNoelle
 					Optional<Tuple<Heroine, Double>> heroin2;
 					{
 						ArrayList<Tuple<Heroine, Double>> heroins = RegistryHeroine.getHeroines()
-							.map(h -> new Tuple<>(h, h.getDistance(imageFaceToMatch, 15)))
-							//.filter(h -> h.getY() < 15)
+							.map(h -> new Tuple<>(h, h.getDistance(imageFaceToMatch, 250)))
+							//.filter(h -> h.getY() < 250)
 							.sorted((a, b) -> (int) Math.signum(a.getY() - b.getY()))
 							.collect(Collectors.toCollection(ArrayList::new));
 						heroin2 = heroins.stream()
@@ -612,7 +612,7 @@ public class GUNoelle
 
 						// このヒロインについて既知といえるか
 						double distance = heroin2.get().getY();
-						known = distance < 15;
+						known = distance < 250;
 						labelFaceParameters.setText(String.format("<html><table>"
 							+ "<tr><td>Name</td><td>%s</td></tr>"
 							+ "<tr><td>距離</td><td>%.6f</td></tr>"

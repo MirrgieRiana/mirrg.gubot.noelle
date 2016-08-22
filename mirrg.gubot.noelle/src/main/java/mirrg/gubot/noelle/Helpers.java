@@ -179,4 +179,20 @@ public class Helpers
 		return dest;
 	}
 
+	private static int[] power2 = new int[256];
+	static {
+		for (int i = 0; i < 256; i++) {
+			power2[i] = i * i;
+		}
+	}
+
+	/**
+	 * @param value
+	 *            0~255
+	 */
+	public static int power2(int value)
+	{
+		return power2[value];
+	}
+
 }

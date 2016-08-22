@@ -48,9 +48,9 @@ public class Heroine
 				int rgb = imageToMatch.getRGB(x, y);
 				int rgb2 = imageToMatch2.getRGB(x, y);
 
-				t += Math.abs(((rgb >> 16) & 0xff) - ((rgb2 >> 16) & 0xff));
-				t += Math.abs(((rgb >> 8) & 0xff) - ((rgb2 >> 8) & 0xff));
-				t += Math.abs((rgb & 0xff) - (rgb2 & 0xff));
+				t += Helpers.power2(Math.abs(((rgb >> 16) & 0xff) - ((rgb2 >> 16) & 0xff)));
+				t += Helpers.power2(Math.abs(((rgb >> 8) & 0xff) - ((rgb2 >> 8) & 0xff)));
+				t += Helpers.power2(Math.abs((rgb & 0xff) - (rgb2 & 0xff)));
 
 				if (t > limit) return 1.0 * t / pixels;
 			}
