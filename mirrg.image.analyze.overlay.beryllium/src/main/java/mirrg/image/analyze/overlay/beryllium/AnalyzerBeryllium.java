@@ -71,12 +71,12 @@ public class AnalyzerBeryllium
 		return argb;
 	}
 
-	private static int trimColor(double value)
+	public static int trimColor(double value)
 	{
 		return trim((int) value, 0, 255);
 	}
 
-	private static int trim(int value, int min, int max)
+	public static int trim(int value, int min, int max)
 	{
 		if (value < min) return min;
 		if (value > max) return max;
