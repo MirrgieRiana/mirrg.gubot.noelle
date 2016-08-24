@@ -46,7 +46,7 @@ public class Helpers
 	 *            0~255
 	 * @return Math.max(diff / (lower safe length) - 1, 0)
 	 */
-	private static double getWeightedDiff(double a, double b, int alpha)
+	public static double getWeightedDiff(double a, double b, int alpha)
 	{
 		if (a > b) {
 			double diff = a - b;
@@ -174,6 +174,35 @@ public class Helpers
 				b = bRange != 0 ? (b - bMin) * 255 / bRange : 0;
 
 				dest.setRGB(x, y, (trim(a, 0, 255) << 24) | (trim(r, 0, 255) << 16) | (trim(g, 0, 255) << 8) | trim(b, 0, 255));
+			}
+		}
+		return dest;
+	}
+
+	public static BufferedImage copyRightMoveSmall(BufferedImage src, double ratio)
+	{
+		BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < src.getHeight(); y++) {
+			dest.setRGB(0, y, src.getRGB(0, y));
+			for (int x = 1; x < src.getWidth(); x++) {
+				int argb = src.getRGB(x, y);
+				int a = (argb >> 24) & 0xff;
+				int r = (argb >> 16) & 0xff;
+				int g = (argb >> 8) & 0xff;
+				int b = (argb >> 0) & 0xff;
+
+				int argb2 = src.getRGB(x - 1, y);
+				int a2 = (argb2 >> 24) & 0xff;
+				int r2 = (argb2 >> 16) & 0xff;
+				int g2 = (argb2 >> 8) & 0xff;
+				int b2 = (argb2 >> 0) & 0xff;
+
+				a = (int) ((1 - ratio) * a + ratio * a2);
+				r = (int) ((1 - ratio) * r + ratio * r2);
+				g = (int) ((1 - ratio) * g + ratio * g2);
+				b = (int) ((1 - ratio) * b + ratio * b2);
+
+				dest.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
 			}
 		}
 		return dest;

@@ -43,11 +43,14 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
+import mirrg.gubot.noelle.font.FontTexture;
+import mirrg.gubot.noelle.font.RegistryFont;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
 import mirrg.gubot.noelle.screen.Island;
 import mirrg.struct.hydrogen.v1_0.Tuple;
+import mirrg.struct.hydrogen.v1_0.Tuple3;
 import mirrg.swing.neon.v1_1.artifacts.logging.FrameLog;
 import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
 
@@ -87,6 +90,7 @@ public class GUNoelle
 	protected JLabel faceLabelGuessed;
 	protected JLabel labelFaceParameters;
 	protected JTextField textFieldNameHeroine;
+	protected JLabel labelExperimentPoints;
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
 	protected JLabel labelSearching;
@@ -258,94 +262,104 @@ public class GUNoelle
 								labelSelecting.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
 								return labelSelecting;
 							})),
-						process(createBorderPanelUp(
-							createBorderPanelLeft(
-								createPanel(get(() -> {
-									faceLabelTrimed = new FaceLabel();
-									return faceLabelTrimed;
-								})),
-								createPanel(get(() -> {
-									faceLabelGuessed = new FaceLabel();
-									return faceLabelGuessed;
-								})),
-								get(() -> {
-									labelFaceParameters = new JLabel();
-									labelFaceParameters.setBackground(Color.white);
-									labelFaceParameters.setOpaque(true);
-									labelFaceParameters.setPreferredSize(new Dimension(150, 90));
-									return labelFaceParameters;
-								})),
-							createBorderPanelLeft(
-								new JLabel("ヒロイン名："),
-								createBorderPanelRight(
-									get(() -> {
-										textFieldNameHeroine = new JTextField(10);
-										textFieldNameHeroine.addActionListener(e -> {
-											doRegister();
-										});
-										return textFieldNameHeroine;
-									}),
-									createButton("登録", e -> {
-										doRegister();
-									}))),
-							createBorderPanelLeft(
-								new JLabel("最大反復回数："),
-								createBorderPanelRight(
-									get(() -> {
-										spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
-										spinnerSkipLimitMax.setAlignmentX(0.5f);
-										((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
-										return spinnerSkipLimitMax;
-									}),
-									get(() -> {
-										labelSkipLimit = new JLabel("0");
-										labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
-										setPreferredSize(labelSkipLimit, 40, 1);
-										return labelSkipLimit;
-									}),
-									get(() -> {
-										labelSearching = new JLabel("停止中");
-										setPreferredSize(labelSearching, 40, 1);
-										return labelSearching;
-									}),
-									createButton("検索", e -> {
-										if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
-										startSearch();
-									}))),
-							createHorizontalSplitPane(
-								createBorderPanelUp(
+						process(createVerticalSplitPane(
+							createBorderPanelUp(
+								createBorderPanelLeft(
 									createPanel(get(() -> {
-										faceLabelSelected = new FaceLabel();
-										return faceLabelSelected;
+										faceLabelTrimed = new FaceLabel();
+										return faceLabelTrimed;
+									})),
+									createPanel(get(() -> {
+										faceLabelGuessed = new FaceLabel();
+										return faceLabelGuessed;
 									})),
 									get(() -> {
-										listHeroines = new JList<>();
-										refreshHeroines();
-										RegistryHeroine.addListener(h -> {
-											refreshHeroines();
-										});
-										listHeroines.addListSelectionListener(e -> {
-											String name = listHeroines.getSelectedValue();
-											if (name != null) {
-												if (name.equals("None")) {
-													faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
-												} else {
-													faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
-												}
-											} else {
-												faceLabelSelected.setIcon(null);
-											}
-										});
-										return createScrollPane(listHeroines, 120, 200);
+										labelFaceParameters = new JLabel();
+										labelFaceParameters.setBackground(Color.white);
+										labelFaceParameters.setOpaque(true);
+										labelFaceParameters.setPreferredSize(new Dimension(150, 90));
+										return labelFaceParameters;
 									})),
+								createBorderPanelLeft(
+									new JLabel("ヒロイン名："),
+									createBorderPanelRight(
+										get(() -> {
+											textFieldNameHeroine = new JTextField(10);
+											textFieldNameHeroine.addActionListener(e -> {
+												doRegister();
+											});
+											return textFieldNameHeroine;
+										}),
+										createButton("登録", e -> {
+											doRegister();
+										}))),
 								get(() -> {
-									listButtleClass = new JList<>();
-									listButtleClass.setListData(Stream.concat(
-										Stream.of("None"),
-										Stream.of(RegistryHeroine.getBattleClasses()))
-										.toArray(String[]::new));
-									return createScrollPane(listButtleClass, 120, 300);
-								}))),
+									labelExperimentPoints = new JLabel();
+									labelExperimentPoints.setBackground(Color.white);
+									labelExperimentPoints.setOpaque(true);
+									setPreferredSize(labelExperimentPoints, 200, 4);
+									labelExperimentPoints.setVerticalAlignment(SwingConstants.TOP);
+									return labelExperimentPoints;
+								})),
+							createBorderPanelUp(
+								createBorderPanelLeft(
+									new JLabel("最大反復回数："),
+									createBorderPanelRight(
+										get(() -> {
+											spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
+											spinnerSkipLimitMax.setAlignmentX(0.5f);
+											((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+											return spinnerSkipLimitMax;
+										}),
+										get(() -> {
+											labelSkipLimit = new JLabel("0");
+											labelSkipLimit.setHorizontalAlignment(SwingConstants.CENTER);
+											setPreferredSize(labelSkipLimit, 40, 1);
+											return labelSkipLimit;
+										}),
+										get(() -> {
+											labelSearching = new JLabel("停止中");
+											setPreferredSize(labelSearching, 40, 1);
+											return labelSearching;
+										}),
+										createButton("検索", e -> {
+											if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
+											startSearch();
+										}))),
+								createHorizontalSplitPane(
+									createBorderPanelUp(
+										createPanel(get(() -> {
+											faceLabelSelected = new FaceLabel();
+											return faceLabelSelected;
+										})),
+										get(() -> {
+											listHeroines = new JList<>();
+											refreshHeroines();
+											RegistryHeroine.addListener(h -> {
+												refreshHeroines();
+											});
+											listHeroines.addListSelectionListener(e -> {
+												String name = listHeroines.getSelectedValue();
+												if (name != null) {
+													if (name.equals("None")) {
+														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
+													} else {
+														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
+													}
+												} else {
+													faceLabelSelected.setIcon(null);
+												}
+											});
+											return createScrollPane(listHeroines, 120, 200);
+										})),
+									get(() -> {
+										listButtleClass = new JList<>();
+										listButtleClass.setListData(Stream.concat(
+											Stream.of("None"),
+											Stream.of(RegistryHeroine.getBattleClasses()))
+											.toArray(String[]::new));
+										return createScrollPane(listButtleClass, 120, 300);
+									})))),
 							c -> {
 								((JComponent) c).setBorder(new BevelBorder(BevelBorder.LOWERED));
 								((JComponent) c).setOpaque(true);
@@ -631,7 +645,6 @@ public class GUNoelle
 					}
 
 					// 経験値文字列取得
-					/*
 					{
 						int LEFT = 20;
 						int LINE_HEIGHT = 21;
@@ -649,37 +662,41 @@ public class GUNoelle
 							while (true) { // fonts
 								int x2 = x;
 								int y2 = y;
-								Optional<Tuple3<Tuple<String, BufferedImage>, Integer, Double>> font = RegistryFont.getFonts()
+								String line2 = line;
+								Optional<Tuple3<FontTexture, Integer, Double>> font = RegistryFont.getFonts()
 									.flatMap(f -> {
 
 										// 右端
-										if (x2 + 2 + f.getY().getWidth() >= guScreen.get().getImage().getWidth()) return Stream.empty();
+										if (x2 + 2 + f.image.getWidth() >= guScreen.get().getImage().getWidth()) return Stream.empty();
 
 										/*
-										if (f.getX().equals("2")) { // TODO
-											aaa.setIcon(new ImageIcon(f.getY()));
-											bbb.setIcon(new ImageIcon(guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight())));
+										if (f.value.endsWith("0")) { // TODO
+											if (f.option.endsWith("W[3]")) { // TODO
+												if (line2.endsWith("2")) { // TODO
+													//System.out.println("a");
+													aaa.setIcon(new ImageIcon(f.image));
+													bbb.setIcon(new ImageIcon(guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.image.getWidth(), f.image.getHeight())));
+												}
+											}
 										}
-										* /
+										*/
 
 										return Stream.of(
-											new Tuple3<>(f, -1, Helpers.getDistance(
-												f.getY(),
-												guScreen.get().getImage().getSubimage(x2 - 1 - 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight()), 1)),
-											new Tuple3<>(f, 0, Helpers.getDistance(
-												f.getY(),
-												guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight()), 1)),
-											new Tuple3<>(f, 1, Helpers.getDistance(
-												f.getY(),
-												guScreen.get().getImage().getSubimage(x2 - 1 + 1, y2 - 1, f.getY().getWidth(), f.getY().getHeight()), 1)));
+											new Tuple3<>(f, -1, f.getDistanceSq(
+												guScreen.get().getImage().getSubimage(x2 - 1 - 1, y2 - 1, f.image.getWidth(), f.image.getHeight()))),
+											new Tuple3<>(f, 0, f.getDistanceSq(
+												guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.image.getWidth(), f.image.getHeight()))),
+											new Tuple3<>(f, 1, f.getDistanceSq(
+												guScreen.get().getImage().getSubimage(x2 - 1 + 1, y2 - 1, f.image.getWidth(), f.image.getHeight()))));
 									})
 									.min((a, b) -> (int) Math.signum(a.getZ() - b.getZ()));
 
 								if (font.isPresent()) {
-									if (font.get().getZ() < 100) {
+									if (font.get().getZ() < FontTexture.DO_NOT_MATCH) {
 										// あった
-										line += font.get().getX().getX();
-										x += font.get().getX().getY().getWidth() - 2;
+										line += /*font.get().getX().option +*/ font.get().getX().value /*+ "{" + String.format("%.2f", font.get().getZ()) + "}"*/;
+										//line += font.get().getX().option + font.get().getX().value + "{" + String.format("%.2f", font.get().getZ()) + "}";
+										x += font.get().getX().image.getWidth() - 2;
 										x += font.get().getY();
 										continue;
 									}
@@ -696,18 +713,21 @@ public class GUNoelle
 							lines.add(line);
 						}
 
-						System.out.println("#############################"); // TODO
-						lines.stream()
-							.forEach(System.out::println);
+						labelExperimentPoints.setText("<html>" + lines.stream()
+							.collect(Collectors.joining("<br>")) + "</html>");
+
+						//System.out.println("#############################"); // TODO
+						//lines.stream()
+						//	.forEach(System.out::println);
 						// TODO
 					}
-					*/
 
 				} else {
 					heroine = Optional.empty();
 					faceLabelGuessed.setIcon(null);
 					known = false;
 					labelFaceParameters.setText("");
+					labelExperimentPoints.setText("");
 				}
 			} else {
 				labelSelecting.setText("No Screen");
@@ -716,6 +736,7 @@ public class GUNoelle
 				faceLabelGuessed.setIcon(null);
 				known = false;
 				labelFaceParameters.setText("");
+				labelExperimentPoints.setText("");
 			}
 
 			// ★スクリーンダイアログが出ている間常時更新
@@ -744,23 +765,24 @@ public class GUNoelle
 	private volatile ArrayList<Runnable> updateEvents = new ArrayList<>();
 	private volatile Object lockUpdateEvent = new Object();
 	private volatile boolean isUpdateEventProcessing;
-	/*
-	private JLabel aaa;
-	private JLabel bbb;
-	*/
 
+	//TODO
+	/*
+		private JLabel aaa;
+		private JLabel bbb;
+	*/
 	private void initThreadUpdateEvent()
 	{
 		//TODO
 		/*
-		JFrame frame = new JFrame();
-		aaa = new JLabel();
-		aaa.setPreferredSize(new Dimension(200, 30));
-		bbb = new JLabel();
-		bbb.setPreferredSize(new Dimension(200, 30));
-		frame.add(createVerticalSplitPane(aaa, bbb));
-		frame.pack();
-		frame.setVisible(true);
+				JDialog frame = new JDialog(frameMain);
+				aaa = new JLabel();
+				aaa.setPreferredSize(new Dimension(200, 30));
+				bbb = new JLabel();
+				bbb.setPreferredSize(new Dimension(200, 30));
+				frame.add(createVerticalSplitPane(aaa, bbb));
+				frame.pack();
+				frame.setVisible(true);
 		*/
 		//TODO
 		threadUpdateEvent = new Thread(() -> {
