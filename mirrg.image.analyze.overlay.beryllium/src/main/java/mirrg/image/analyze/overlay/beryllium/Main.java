@@ -9,6 +9,9 @@ import java.util.ArrayList;
 public class Main
 {
 
+	/**
+	 * 2つ以上の「背景とオーバーレイ付き画像の組」からオーバーレイ画像を計算する。
+	 */
 	public static void main(String[] argv) throws Exception
 	{
 		File dir = new File("workspace");
