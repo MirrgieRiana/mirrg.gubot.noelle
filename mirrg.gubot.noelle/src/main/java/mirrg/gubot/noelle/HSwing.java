@@ -16,8 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import jp.hishidama.swing.layout.GroupLayoutUtil;
-
 public class HSwing
 {
 
@@ -111,17 +109,6 @@ public class HSwing
 		panel.setLayout(new BorderLayout(4, 4));
 		panel.add(createBorderPanelRight(components.subList(0, components.size() - 1)), BorderLayout.CENTER);
 		panel.add(components.get(components.size() - 1), BorderLayout.EAST);
-
-		return panel;
-	}
-
-	public static JPanel createGridPanel(Component[][] grid)
-	{
-		JPanel panel = new JPanel();
-
-		GroupLayoutUtil g = new GroupLayoutUtil();
-		g.setComponents(grid);
-		g.setGroupLayoutTo(panel);
 
 		return panel;
 	}
