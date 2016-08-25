@@ -116,10 +116,16 @@ public class GUNoelle
 
 		{
 			frameMain = new JFrame("闇のツール");
-			try {
-				frameMain.setIconImage(ImageIO.read(new File("faces/ノエル.png")));
-			} catch (IOException e2) {
-				e2.printStackTrace();
+
+			{
+				File file = new File("faces/ノエル.png");
+				if (file.isFile()) {
+					try {
+						frameMain.setIconImage(ImageIO.read(file));
+					} catch (IOException e2) {
+						e2.printStackTrace();
+					}
+				}
 			}
 
 			frameMain.addWindowListener(new WindowListener() {
