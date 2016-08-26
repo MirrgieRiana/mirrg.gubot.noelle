@@ -122,8 +122,8 @@ public class GUNoelle
 				if (file.isFile()) {
 					try {
 						frameMain.setIconImage(ImageIO.read(file));
-					} catch (IOException e2) {
-						e2.printStackTrace();
+					} catch (IOException e) {
+						HLog.processException(e);
 					}
 				}
 			}
