@@ -1,10 +1,10 @@
 package mirrg.image.analyze.overlay.beryllium;
 
-import static javax.imageio.ImageIO.*;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 public class Main
 {
@@ -23,16 +23,16 @@ public class Main
 			File file2 = new File(dir, String.format("%03do.png", i));
 			if (file1.isFile()) {
 				if (file2.isFile()) {
-					pairs.add(new ImagePair(read(file1), read(file2)));
+					pairs.add(new ImagePair(ImageIO.read(file1), ImageIO.read(file2)));
 					continue;
 				}
 			}
 			break;
 		}
 
-		BufferedImage image5 = AnalyzerBeryllium.analyze(pairs.stream().toArray(ImagePair[]::new));
+		BufferedImage dest = AnalyzerBeryllium.analyze(pairs.stream().toArray(ImagePair[]::new));
 
-		write(image5, "png", new File(dir, "out.png"));
+		ImageIO.write(dest, "png", new File(dir, "out1.png"));
 	}
 
 }
