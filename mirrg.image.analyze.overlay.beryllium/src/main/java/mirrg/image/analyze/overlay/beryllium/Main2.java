@@ -17,7 +17,8 @@ public class Main2
 	 */
 	public static void main(String[] args) throws IOException
 	{
-		BufferedImage src = ImageIO.read(new File("002.png"));
+		File dir = new File("workspace");
+		BufferedImage src = ImageIO.read(new File(dir, "002.png"));
 		BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
 		for (int x = 0; x < src.getWidth(); x++) {
@@ -42,7 +43,7 @@ public class Main2
 			}
 		}
 
-		ImageIO.write(dest, "png", new File("out.png"));
+		ImageIO.write(dest, "png", new File(dir, "out2.png"));
 	}
 
 }
