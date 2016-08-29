@@ -444,6 +444,33 @@ public class GUNoelle
 						return;
 					}
 
+					// 0.5秒経過
+					if (t > 500) {
+						if (isSelecting) {
+
+							// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
+							SwingUtilities.invokeLater(() -> {
+								setStatusBar("未知のヒロインです。");
+							});
+							return;
+
+						} else {
+
+							// 非選択中
+							SwingUtilities.invokeLater(() -> {
+								setStatusBar("領地選択画面から離れました。");
+							});
+							return;
+
+						}
+					}
+
+					// 黒背景
+					if (known && heroine.get().name.equals("黒")) {
+						t = 0;
+						continue;
+					}
+
 					// 既知ヒロインが居た場合
 					if (known && !heroine.get().name.equals("黒")) {
 
@@ -499,33 +526,6 @@ public class GUNoelle
 
 						t = 0;
 						continue;
-					}
-
-					// 黒背景
-					if (known && heroine.get().name.equals("黒")) {
-						t = 0;
-						continue;
-					}
-
-					// 0.5秒経過
-					if (t > 500) {
-						if (isSelecting) {
-
-							// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
-							SwingUtilities.invokeLater(() -> {
-								setStatusBar("未知のヒロインです。");
-							});
-							return;
-
-						} else {
-
-							// 非選択中
-							SwingUtilities.invokeLater(() -> {
-								setStatusBar("領地選択画面から離れました。");
-							});
-							return;
-
-						}
 					}
 
 				}
