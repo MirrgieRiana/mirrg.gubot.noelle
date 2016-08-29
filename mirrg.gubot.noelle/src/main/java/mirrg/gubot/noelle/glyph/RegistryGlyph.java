@@ -1,4 +1,4 @@
-package mirrg.gubot.noelle.font;
+package mirrg.gubot.noelle.glyph;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,14 +14,14 @@ import mirrg.gubot.noelle.Helpers;
 import mirrg.gubot.noelle.RegistryHeroine;
 import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
 
-public class RegistryFont
+public class RegistryGlyph
 {
 
 	public static final Pattern PATTERN_CSV_CELL = Pattern.compile(",?([^,]+)");
 
-	private static ArrayList<FontTexture> fonts = new ArrayList<>();
+	private static ArrayList<Glyph> glyphs = new ArrayList<>();
 	static {
-		File dir = new File("fonts");
+		File dir = new File("glyphs");
 		Stream.of(dir.listFiles())
 			.forEach(f -> {
 				Matcher matcher = RegistryHeroine.PATTERN_FILENAME_BODY.matcher(f.getName());
@@ -49,16 +49,16 @@ public class RegistryFont
 					for (int i = 0; i < div; i++) {
 
 						// 白
-						fonts.add(new FontTexture(cells.get(0), "W[" + i + "]", Helpers.copyRightMoveSmall(image1, i / div), isFixed));
+						glyphs.add(new Glyph(cells.get(0), "W[" + i + "]", Helpers.copyRightMoveSmall(image1, i / div), isFixed));
 
 						// 赤
-						fonts.add(new FontTexture(cells.get(0), "R[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 0, 0), i / div), isFixed));
+						glyphs.add(new Glyph(cells.get(0), "R[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 0, 0), i / div), isFixed));
 
 						// 橙
-						fonts.add(new FontTexture(cells.get(0), "O[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 127, 0), i / div), isFixed));
+						glyphs.add(new Glyph(cells.get(0), "O[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 127, 0), i / div), isFixed));
 
 						// 桃
-						fonts.add(new FontTexture(cells.get(0), "P[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 127, 127), i / div), isFixed));
+						glyphs.add(new Glyph(cells.get(0), "P[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 127, 127), i / div), isFixed));
 
 					}
 
@@ -66,9 +66,9 @@ public class RegistryFont
 			});
 	}
 
-	public static Stream<FontTexture> getFonts()
+	public static Stream<Glyph> getGlyphs()
 	{
-		return fonts.stream();
+		return glyphs.stream();
 	}
 
 }

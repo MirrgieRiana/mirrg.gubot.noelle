@@ -1,10 +1,10 @@
-package mirrg.gubot.noelle.font;
+package mirrg.gubot.noelle.glyph;
 
 import java.awt.image.BufferedImage;
 
 import mirrg.gubot.noelle.Helpers;
 
-public class FontTexture
+public class Glyph
 {
 
 	public static final double DO_NOT_MATCH = 9999999;
@@ -20,7 +20,7 @@ public class FontTexture
 
 	private Integer sumAlpha;
 
-	public FontTexture(String value, String option, BufferedImage image, boolean isFixed)
+	public Glyph(String value, String option, BufferedImage image, boolean isFixed)
 	{
 		this.value = value;
 		this.option = option;

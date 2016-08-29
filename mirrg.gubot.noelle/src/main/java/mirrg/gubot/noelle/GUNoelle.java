@@ -43,8 +43,8 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
-import mirrg.gubot.noelle.font.FontTexture;
-import mirrg.gubot.noelle.font.RegistryFont;
+import mirrg.gubot.noelle.glyph.Glyph;
+import mirrg.gubot.noelle.glyph.RegistryGlyph;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
@@ -669,7 +669,7 @@ public class GUNoelle
 								int x2 = x;
 								int y2 = y;
 								String line2 = line;
-								Optional<Tuple3<FontTexture, Integer, Double>> font = RegistryFont.getFonts()
+								Optional<Tuple3<Glyph, Integer, Double>> glyph = RegistryGlyph.getGlyphs()
 									.flatMap(f -> {
 
 										// 右端
@@ -697,13 +697,13 @@ public class GUNoelle
 									})
 									.min((a, b) -> (int) Math.signum(a.getZ() - b.getZ()));
 
-								if (font.isPresent()) {
-									if (font.get().getZ() < FontTexture.DO_NOT_MATCH) {
+								if (glyph.isPresent()) {
+									if (glyph.get().getZ() < Glyph.DO_NOT_MATCH) {
 										// あった
-										line += /*font.get().getX().option +*/ font.get().getX().value /*+ "{" + String.format("%.2f", font.get().getZ()) + "}"*/;
+										line += /*font.get().getX().option +*/ glyph.get().getX().value /*+ "{" + String.format("%.2f", font.get().getZ()) + "}"*/;
 										//line += font.get().getX().option + font.get().getX().value + "{" + String.format("%.2f", font.get().getZ()) + "}";
-										x += font.get().getX().image.getWidth() - 2;
-										x += font.get().getY();
+										x += glyph.get().getX().image.getWidth() - 2;
+										x += glyph.get().getY();
 										continue;
 									}
 								}
