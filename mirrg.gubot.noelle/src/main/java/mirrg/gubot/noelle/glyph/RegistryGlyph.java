@@ -4,13 +4,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
-import mirrg.gubot.noelle.Helpers;
 import mirrg.gubot.noelle.RegistryHeroine;
 import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
 
@@ -19,7 +19,7 @@ public class RegistryGlyph
 
 	public static final Pattern PATTERN_CSV_CELL = Pattern.compile(",?([^,]+)");
 
-	private static ArrayList<Glyph> glyphs = new ArrayList<>();
+	private static Hashtable<String, GlyphSet> glyphSets = new Hashtable<>();
 	static {
 		File dir = new File("glyphs");
 		Stream.of(dir.listFiles())
@@ -35,40 +35,35 @@ public class RegistryGlyph
 						}
 					}
 
-					BufferedImage image1;
+					BufferedImage image;
 					try {
-						image1 = ImageIO.read(f);
+						image = ImageIO.read(f);
 					} catch (IOException e) {
 						HLog.processException(e);
 						throw new RuntimeException(e);
 					}
 
-					boolean isFixed = cells.contains("fixed");
-
-					double div = 16;
-					for (int i = 0; i < div; i++) {
-
-						// 白
-						glyphs.add(new Glyph(cells.get(0), "W[" + i + "]", Helpers.copyRightMoveSmall(image1, i / div), isFixed));
-
-						// 赤
-						glyphs.add(new Glyph(cells.get(0), "R[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 0, 0), i / div), isFixed));
-
-						// 橙
-						glyphs.add(new Glyph(cells.get(0), "O[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 127, 0), i / div), isFixed));
-
-						// 桃
-						glyphs.add(new Glyph(cells.get(0), "P[" + i + "]", Helpers.copyRightMoveSmall(Helpers.copy(image1, 255, 255, 127, 127), i / div), isFixed));
-
-					}
+					glyphSets.put(cells.get(0), new GlyphSet(cells.get(0), image, cells.indexOf("fixed") >= 1));
 
 				}
 			});
 	}
 
+	public static Stream<GlyphSet> getGlyphSets()
+	{
+		return glyphSets.entrySet().stream()
+			.map(e -> e.getValue());
+	}
+
+	public static GlyphSet getGlyphSet(String key)
+	{
+		return glyphSets.get(key);
+	}
+
 	public static Stream<Glyph> getGlyphs()
 	{
-		return glyphs.stream();
+		return getGlyphSets()
+			.flatMap(s -> s.stream());
 	}
 
 }

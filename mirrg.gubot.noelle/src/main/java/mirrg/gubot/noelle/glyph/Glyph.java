@@ -9,24 +9,32 @@ public class Glyph
 
 	public static final double DO_NOT_MATCH = 9999999;
 
-	public String value;
-	public String option;
-	/**
-	 * 真の文字幅は「実際の画像サイズ-2」。
-	 * 上下も余白が1px入る。
-	 */
-	public BufferedImage image;
-	public boolean isFixed;
+	public final String value;
+	public final EnumGlyphColor color;
+	public final int subPixelIndex;
+	public final BufferedImage image;
+	public final boolean isFixed;
 
-	private Integer sumAlpha;
-
-	public Glyph(String value, String option, BufferedImage image, boolean isFixed)
+	public Glyph(String value, EnumGlyphColor color, int subPixelIndex, BufferedImage image, boolean isFixed)
 	{
 		this.value = value;
-		this.option = option;
+		this.color = color;
+		this.subPixelIndex = subPixelIndex;
 		this.image = image;
 		this.isFixed = isFixed;
 	}
+
+	public int getWidth()
+	{
+		return image.getWidth();
+	}
+
+	public int getTrueWidth()
+	{
+		return getWidth() - 2;
+	}
+
+	private Integer sumAlpha;
 
 	public int getSumAlpha()
 	{
@@ -41,10 +49,15 @@ public class Glyph
 		return sumAlpha;
 	}
 
-	public double getDistanceSq(BufferedImage challenger)
+	public static double getDistanceLimit(boolean isFixed)
+	{
+		return isFixed ? 10 : 12000;
+	}
+
+	public double getDistanceSq(BufferedImage image1, boolean isFixed)
 	{
 		double t = 0;
-		double limit = (isFixed ? 10 : 12000) * getSumAlpha() * 3;
+		double limit = getDistanceLimit(isFixed) * getSumAlpha() * 3;
 
 		for (int x = 0; x < image.getWidth(); x++) {
 			for (int y = 0; y < image.getHeight(); y++) {
@@ -53,7 +66,7 @@ public class Glyph
 				int r1 = (rgb1 >> 16) & 0xff;
 				int g1 = (rgb1 >> 8) & 0xff;
 				int b1 = (rgb1 >> 0) & 0xff;
-				int rgb2 = challenger.getRGB(x, y);
+				int rgb2 = image1.getRGB(x, y);
 				int r2 = (rgb2 >> 16) & 0xff;
 				int g2 = (rgb2 >> 8) & 0xff;
 				int b2 = (rgb2 >> 0) & 0xff;

@@ -43,14 +43,13 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
-import mirrg.gubot.noelle.glyph.Glyph;
-import mirrg.gubot.noelle.glyph.RegistryGlyph;
+import mirrg.gubot.noelle.glyph.ISyntax;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
 import mirrg.gubot.noelle.screen.Island;
 import mirrg.struct.hydrogen.v1_0.Tuple;
-import mirrg.struct.hydrogen.v1_0.Tuple3;
+import mirrg.struct.hydrogen.v1_0.Tuple4;
 import mirrg.swing.neon.v1_1.artifacts.logging.FrameLog;
 import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
 
@@ -303,8 +302,7 @@ public class GUNoelle
 									labelExperimentPoints = new JLabel();
 									labelExperimentPoints.setBackground(Color.white);
 									labelExperimentPoints.setOpaque(true);
-									setPreferredSize(labelExperimentPoints, 200, 4);
-									labelExperimentPoints.setVerticalAlignment(SwingConstants.TOP);
+									labelExperimentPoints.setPreferredSize(new Dimension(200, 90));
 									return labelExperimentPoints;
 								})),
 							createBorderPanelUp(
@@ -647,93 +645,36 @@ public class GUNoelle
 					} else {
 						faceLabelGuessed.setIcon(null);
 						known = false;
-						labelFaceParameters.setText("");
+						labelFaceParameters.setText("<html></html>");
 					}
 
 					// 経験値文字列取得
 					{
-						int LEFT = 20;
-						int LINE_HEIGHT = 21;
-						int x = LEFT;
-						int y = 123;
+						Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> result = ISyntax.parseNoelle(guScreen.get().getImage(), 20, 123);
 
-						ArrayList<String> lines = new ArrayList<>();
-
-						while (true) { // lines
-							String line = "";
-
-							// 下端
-							if (y + LINE_HEIGHT >= height) break;
-
-							while (true) { // fonts
-								int x2 = x;
-								int y2 = y;
-								String line2 = line;
-								Optional<Tuple3<Glyph, Integer, Double>> glyph = RegistryGlyph.getGlyphs()
-									.flatMap(f -> {
-
-										// 右端
-										if (x2 + 2 + f.image.getWidth() >= guScreen.get().getImage().getWidth()) return Stream.empty();
-
-										/*
-										if (f.value.endsWith("0")) { // TODO
-											if (f.option.endsWith("W[3]")) { // TODO
-												if (line2.endsWith("2")) { // TODO
-													//System.out.println("a");
-													aaa.setIcon(new ImageIcon(f.image));
-													bbb.setIcon(new ImageIcon(guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.image.getWidth(), f.image.getHeight())));
-												}
-											}
-										}
-										*/
-
-										return Stream.of(
-											new Tuple3<>(f, -1, f.getDistanceSq(
-												guScreen.get().getImage().getSubimage(x2 - 1 - 1, y2 - 1, f.image.getWidth(), f.image.getHeight()))),
-											new Tuple3<>(f, 0, f.getDistanceSq(
-												guScreen.get().getImage().getSubimage(x2 - 1, y2 - 1, f.image.getWidth(), f.image.getHeight()))),
-											new Tuple3<>(f, 1, f.getDistanceSq(
-												guScreen.get().getImage().getSubimage(x2 - 1 + 1, y2 - 1, f.image.getWidth(), f.image.getHeight()))));
-									})
-									.min((a, b) -> (int) Math.signum(a.getZ() - b.getZ()));
-
-								if (glyph.isPresent()) {
-									if (glyph.get().getZ() < Glyph.DO_NOT_MATCH) {
-										// あった
-										line += /*font.get().getX().option +*/ glyph.get().getX().value /*+ "{" + String.format("%.2f", font.get().getZ()) + "}"*/;
-										//line += font.get().getX().option + font.get().getX().value + "{" + String.format("%.2f", font.get().getZ()) + "}";
-										x += glyph.get().getX().image.getWidth() - 2;
-										x += glyph.get().getY();
-										continue;
-									}
-								}
-
-								// なかった
-								x = LEFT;
-								y += LINE_HEIGHT;
-								break;
-							}
-
-							if (line.isEmpty()) break;
-
-							lines.add(line);
+						if (result == null) {
+							labelExperimentPoints.setText("<html></html>");
+						} else {
+							labelExperimentPoints.setText(String.format("<html>"
+								+ "<tr><td>領主経験値</td><td>%s</td></tr>"
+								+ "<tr><td>ヒロイン経験値</td><td>%s</td></tr>"
+								+ "<tr><td>経験値倍率</td><td>%s</td></tr>"
+								+ "<tr><td>封印石ボーナス</td><td>%s</td></tr>"
+								+ "</html>",
+								result.getX(),
+								result.getY(),
+								result.getZ().orElse(1.0),
+								result.getW().orElse(0)));
 						}
 
-						labelExperimentPoints.setText("<html>" + lines.stream()
-							.collect(Collectors.joining("<br>")) + "</html>");
-
-						//System.out.println("#############################"); // TODO
-						//lines.stream()
-						//	.forEach(System.out::println);
-						// TODO
 					}
 
 				} else {
 					heroine = Optional.empty();
 					faceLabelGuessed.setIcon(null);
 					known = false;
-					labelFaceParameters.setText("");
-					labelExperimentPoints.setText("");
+					labelFaceParameters.setText("<html></html>");
+					labelExperimentPoints.setText("<html></html>");
 				}
 			} else {
 				labelSelecting.setText("No Screen");
@@ -741,8 +682,8 @@ public class GUNoelle
 				heroine = Optional.empty();
 				faceLabelGuessed.setIcon(null);
 				known = false;
-				labelFaceParameters.setText("");
-				labelExperimentPoints.setText("");
+				labelFaceParameters.setText("<html></html>");
+				labelExperimentPoints.setText("<html></html>");
 			}
 
 			// ★スクリーンダイアログが出ている間常時更新
@@ -772,25 +713,8 @@ public class GUNoelle
 	private volatile Object lockUpdateEvent = new Object();
 	private volatile boolean isUpdateEventProcessing;
 
-	//TODO
-	/*
-		private JLabel aaa;
-		private JLabel bbb;
-	*/
 	private void initThreadUpdateEvent()
 	{
-		//TODO
-		/*
-				JDialog frame = new JDialog(frameMain);
-				aaa = new JLabel();
-				aaa.setPreferredSize(new Dimension(200, 30));
-				bbb = new JLabel();
-				bbb.setPreferredSize(new Dimension(200, 30));
-				frame.add(createVerticalSplitPane(aaa, bbb));
-				frame.pack();
-				frame.setVisible(true);
-		*/
-		//TODO
 		threadUpdateEvent = new Thread(() -> {
 			while (true) {
 				ArrayList<Runnable> updateEvents2;
