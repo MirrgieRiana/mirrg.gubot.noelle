@@ -269,7 +269,7 @@ public interface ISyntax<T>
 	}
 
 	/**
-	 * repeat >= 0
+	 * {@code repeat >= 0}
 	 */
 	public static <T> ISyntax<ArrayList<T>> re0(ISyntax<T> syntax)
 	{
@@ -277,7 +277,7 @@ public interface ISyntax<T>
 	}
 
 	/**
-	 * repeat >= 1
+	 * {@code repeat >= 1}
 	 */
 	public static <T> ISyntax<ArrayList<T>> re1(ISyntax<T> syntax)
 	{
@@ -285,7 +285,7 @@ public interface ISyntax<T>
 	}
 
 	/**
-	 * max >= repeat >= min
+	 * {@code max >= repeat >= min}
 	 */
 	public static <T> ISyntax<ArrayList<T>> re(ISyntax<T> syntax, int min, int max)
 	{
