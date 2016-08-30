@@ -533,7 +533,7 @@ public class GUNoelle
 			if (known) {
 				if (heroine.get().name.equals("黒")) { // 黒背景
 
-					time = 0;
+					time = milis;
 					return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
 
 				} else { // 既知ヒロインが居た
