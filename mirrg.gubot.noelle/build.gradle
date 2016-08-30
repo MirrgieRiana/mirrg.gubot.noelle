@@ -26,6 +26,9 @@ dependencies {
 	//compile group: 'mirrg', name: 'mirrg.struct.hydrogen-1.0', version: '+'
 	compile group: 'mirrg', name: 'mirrg.swing.neon-1.1', version: '+'
 
+	// https://mvnrepository.com/artifact/com.googlecode.soundlibs/basicplayer
+	compile group: 'com.googlecode.soundlibs', name: 'basicplayer', version: '3.0.0.0'
+
 }
 
 // ★追加のリポジトリURL

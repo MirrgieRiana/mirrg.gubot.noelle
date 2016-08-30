@@ -43,6 +43,8 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 
+import javazoom.jlgui.basicplayer.BasicPlayer;
+import javazoom.jlgui.basicplayer.BasicPlayerException;
 import mirrg.gubot.noelle.glyph.ISyntax;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
@@ -94,6 +96,7 @@ public class GUNoelle
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
 	protected JLabel labelSearching;
+	protected JCheckBox checkBoxSound;
 	protected JCheckBox checkBoxUnknownHeroine;
 	protected JCheckBox checkBoxExperienceTrap;
 	protected JSpinner spinnerExperienceMax;
@@ -337,6 +340,15 @@ public class GUNoelle
 											if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
 											startSearch();
 										}))),
+								createBorderPanelLeft(
+									get(() -> {
+										checkBoxSound = new JCheckBox("停止時音を鳴らす");
+										checkBoxSound.setSelected(true);
+										return checkBoxSound;
+									}),
+									createBorderPanelRight(
+										null,
+										createButton("試聴", e -> playSound()))),
 								createBorderPanelLeft(
 									get(() -> {
 										checkBoxUnknownHeroine = new JCheckBox("未知ヒロインで停止");
@@ -706,10 +718,24 @@ public class GUNoelle
 				SwingUtilities.invokeLater(() -> {
 					labelSearching.setText("停止中");
 				});
+
+				if (checkBoxSound.isSelected()) playSound();
+
 			}
 		});
 		thread.setDaemon(true);
 		thread.start();
+	}
+
+	private void playSound()
+	{
+		BasicPlayer basicPlayerDie = new BasicPlayer();
+		try {
+			basicPlayerDie.open(new File("die.mp3"));
+			basicPlayerDie.play();
+		} catch (BasicPlayerException e) {
+			HLog.processException(e);
+		}
 	}
 
 	private void doRegister()
