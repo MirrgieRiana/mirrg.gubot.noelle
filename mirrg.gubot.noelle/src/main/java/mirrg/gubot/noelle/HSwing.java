@@ -57,7 +57,10 @@ public class HSwing
 
 		panel.setLayout(new BorderLayout(4, 4));
 		panel.add(components.get(0), BorderLayout.NORTH);
-		panel.add(createBorderPanelUp(components.subList(1, components.size())), BorderLayout.CENTER);
+		{
+			Component component = createBorderPanelUp(components.subList(1, components.size()));
+			if (component != null) panel.add(component, BorderLayout.CENTER);
+		}
 
 		return panel;
 	}
@@ -73,7 +76,10 @@ public class HSwing
 		JPanel panel = new JPanel();
 
 		panel.setLayout(new BorderLayout(4, 4));
-		panel.add(createBorderPanelDown(components.subList(0, components.size() - 1)), BorderLayout.CENTER);
+		{
+			Component component = createBorderPanelDown(components.subList(0, components.size() - 1));
+			if (component != null) panel.add(component, BorderLayout.CENTER);
+		}
 		panel.add(components.get(components.size() - 1), BorderLayout.SOUTH);
 
 		return panel;
@@ -91,7 +97,10 @@ public class HSwing
 
 		panel.setLayout(new BorderLayout(4, 4));
 		panel.add(components.get(0), BorderLayout.WEST);
-		panel.add(createBorderPanelLeft(components.subList(1, components.size())), BorderLayout.CENTER);
+		{
+			Component component = createBorderPanelLeft(components.subList(1, components.size()));
+			if (component != null) panel.add(component, BorderLayout.CENTER);
+		}
 
 		return panel;
 	}
@@ -107,7 +116,10 @@ public class HSwing
 		JPanel panel = new JPanel();
 
 		panel.setLayout(new BorderLayout(4, 4));
-		panel.add(createBorderPanelRight(components.subList(0, components.size() - 1)), BorderLayout.CENTER);
+		{
+			Component component = createBorderPanelRight(components.subList(0, components.size() - 1));
+			if (component != null) panel.add(component, BorderLayout.CENTER);
+		}
 		panel.add(components.get(components.size() - 1), BorderLayout.EAST);
 
 		return panel;

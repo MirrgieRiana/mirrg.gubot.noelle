@@ -90,9 +90,16 @@ public class GUNoelle
 	protected JLabel labelFaceParameters;
 	protected JTextField textFieldNameHeroine;
 	protected JLabel labelExperimentPoints;
+	protected Tuple4<Integer, Integer, Double, Integer> resultExperimentPoints;
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
 	protected JLabel labelSearching;
+	protected JCheckBox checkBoxUnknownHeroine;
+	protected JCheckBox checkBoxExperienceTrap;
+	protected JSpinner spinnerExperienceMax;
+	protected JSpinner spinnerExperienceMin;
+	protected JSpinner spinnerExperienceRatioMin;
+	protected JSpinner spinnerStoneBonusMin;
 	protected JLabel faceLabelSelected;
 	protected JList<String> listHeroines;
 	protected JList<String> listButtleClass;
@@ -330,6 +337,52 @@ public class GUNoelle
 											if (!checkBoxRunning.isSelected()) checkBoxRunning.doClick();
 											startSearch();
 										}))),
+								createBorderPanelLeft(
+									get(() -> {
+										checkBoxUnknownHeroine = new JCheckBox("未知ヒロインで停止");
+										checkBoxUnknownHeroine.setSelected(true);
+										return checkBoxUnknownHeroine;
+									}),
+									null),
+								createBorderPanelLeft(
+									get(() -> {
+										checkBoxExperienceTrap = new JCheckBox("経験値捕獲を有効にする");
+										return checkBoxExperienceTrap;
+									}),
+									null),
+								createBorderPanelLeft(
+									new JLabel("　　領主経験値："),
+									createBorderPanelRight(
+										null,
+										get(() -> {
+											spinnerExperienceMin = new JSpinner(new SpinnerNumberModel(10000, 0, 10000, 100));
+											((JSpinner.DefaultEditor) spinnerExperienceMin.getEditor()).getTextField().setColumns(6);
+											return spinnerExperienceMin;
+										}),
+										new JLabel("～"),
+										get(() -> {
+											spinnerExperienceMax = new JSpinner(new SpinnerNumberModel(10000, 0, 10000, 100));
+											((JSpinner.DefaultEditor) spinnerExperienceMax.getEditor()).getTextField().setColumns(6);
+											return spinnerExperienceMax;
+										}))),
+								createBorderPanelLeft(
+									new JLabel("　　最小経験値倍率："),
+									createBorderPanelRight(
+										null,
+										get(() -> {
+											spinnerExperienceRatioMin = new JSpinner(new SpinnerNumberModel(5.0, 1.0, 5.0, 0.2));
+											((JSpinner.DefaultEditor) spinnerExperienceRatioMin.getEditor()).getTextField().setColumns(2);
+											return spinnerExperienceRatioMin;
+										}))),
+								createBorderPanelLeft(
+									new JLabel("　　最小封印石ボーナス："),
+									createBorderPanelRight(
+										null,
+										get(() -> {
+											spinnerStoneBonusMin = new JSpinner(new SpinnerNumberModel(3, 0, 3, 1));
+											((JSpinner.DefaultEditor) spinnerStoneBonusMin.getEditor()).getTextField().setColumns(2);
+											return spinnerStoneBonusMin;
+										}))),
 								createHorizontalSplitPane(
 									createBorderPanelUp(
 										createPanel(get(() -> {
@@ -407,16 +460,187 @@ public class GUNoelle
 			(int) (Math.random() * 128)));
 	}
 
+	public static enum EnumPluginSearchCondition
+	{
+		SKIPPABLE,
+		STOP,
+		WAITING,
+	}
+
+	public static interface IPluginSearch
+	{
+
+		public Tuple<EnumPluginSearchCondition, String> tick(int milis);
+
+		public default void onSkipped()
+		{
+
+		}
+
+	}
+
+	/**
+	 * Noelle最小化時に終わる
+	 */
+	public class PluginSearchIconified implements IPluginSearch
+	{
+
+		@Override
+		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
+		{
+			if (isIconified) {
+				return new Tuple<>(EnumPluginSearchCondition.STOP, "ツール画面が最小化されました。");
+			} else {
+				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+			}
+		}
+
+	}
+
+	/**
+	 * GUを見失ったら終わる
+	 */
+	public class PluginSearchGUScreen implements IPluginSearch
+	{
+
+		@Override
+		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
+		{
+			if (!guScreen.isPresent()) {
+				return new Tuple<>(EnumPluginSearchCondition.STOP, "スクリーンを認識できません。");
+			} else {
+				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+			}
+		}
+
+	}
+
+	public class PluginSearchHeroine implements IPluginSearch
+	{
+
+		private int time = 0;
+
+		@Override
+		public void onSkipped()
+		{
+			time = 0;
+		}
+
+		@Override
+		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
+		{
+
+			if (known) {
+				if (heroine.get().name.equals("黒")) { // 黒背景
+
+					time = 0;
+					return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
+
+				} else { // 既知ヒロインが居た
+
+					// キャッチヒロインに指定されている場合終了
+					if (listHeroines.getSelectedValuesList().stream()
+						.map(o -> o)
+						.filter(b -> b.equals(heroine.get().name))
+						.findAny()
+						.isPresent()) {
+						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定のヒロインです。");
+					}
+
+					// キャッチクラスに指定されている場合終了
+					if (listButtleClass.getSelectedValuesList().stream()
+						.map(o -> o)
+						.filter(b -> b.equals(heroine.get().getButtleClass()))
+						.findAny()
+						.isPresent()) {
+						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定のクラスのヒロインです。");
+					}
+
+					// 飛ばしてよい
+					return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+
+				}
+			}
+
+			// 0.5秒経過
+			if (milis - time > 500) {
+				if (isSelecting) {
+
+					// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
+					if (checkBoxUnknownHeroine.isSelected()) {
+						return new Tuple<>(EnumPluginSearchCondition.STOP, "未知のヒロインです。");
+					} else {
+						return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+					}
+
+				} else {
+
+					// 非選択中
+					return new Tuple<>(EnumPluginSearchCondition.STOP, "領地選択画面から離れました。");
+
+				}
+			}
+
+			return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
+		}
+
+	}
+
+	public class PluginSearchExperiencePoints implements IPluginSearch
+	{
+
+		@Override
+		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
+		{
+			if (checkBoxExperienceTrap.isSelected()) {
+				if (resultExperimentPoints != null) {
+
+					int max = (Integer) spinnerExperienceMax.getModel().getValue();
+					int min = (Integer) spinnerExperienceMin.getModel().getValue();
+					if (min <= resultExperimentPoints.getX() && resultExperimentPoints.getX() >= max) {
+						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の経験値です。");
+					}
+
+					double ratioMin = (Double) spinnerExperienceRatioMin.getModel().getValue();
+					if (ratioMin <= resultExperimentPoints.getZ()) {
+						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の倍率です。");
+					}
+
+					int stoneBonusMin = (Integer) spinnerStoneBonusMin.getModel().getValue();
+					if (stoneBonusMin <= resultExperimentPoints.getW()) {
+						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の封印石ボーナスです。");
+					}
+
+					return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+				} else {
+					return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
+				}
+			} else {
+				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+			}
+		}
+
+	}
+
 	private void startSearch()
 	{
 		Thread thread = new Thread(() -> {
 			int t = 0;
 			int skipLimit = (Integer) spinnerSkipLimitMax.getValue();
 
+			ArrayList<IPluginSearch> plugins = new ArrayList<>();
+			{
+				plugins.add(new PluginSearchIconified());
+				plugins.add(new PluginSearchGUScreen());
+				plugins.add(new PluginSearchHeroine());
+				plugins.add(new PluginSearchExperiencePoints());
+			}
+
 			SwingUtilities.invokeLater(() -> {
 				setStatusBar("");
 				labelSearching.setText("実行中");
 			});
+
 			try {
 				while (true) {
 					labelSkipLimit.setText("" + skipLimit);
@@ -428,77 +652,24 @@ public class GUNoelle
 					}
 					t += 15;
 
-					// Noelle最小化時に終わる
-					if (isIconified) {
-						SwingUtilities.invokeLater(() -> {
-							setStatusBar("ツール画面が最小化されました。");
-						});
-						return;
-					}
+					boolean skippable = true;
+					for (IPluginSearch plugin : plugins) {
+						Tuple<EnumPluginSearchCondition, String> res = plugin.tick(t);
 
-					// GUを見失ったら終わる
-					if (!guScreen.isPresent()) {
-						SwingUtilities.invokeLater(() -> {
-							setStatusBar("スクリーンを認識できません。");
-						});
-						return;
-					}
-
-					// 0.5秒経過
-					if (t > 500) {
-						if (isSelecting) {
-
-							// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
+						if (res.getX() == EnumPluginSearchCondition.STOP) {
 							SwingUtilities.invokeLater(() -> {
-								setStatusBar("未知のヒロインです。");
-							});
-							return;
-
-						} else {
-
-							// 非選択中
-							SwingUtilities.invokeLater(() -> {
-								setStatusBar("領地選択画面から離れました。");
-							});
-							return;
-
-						}
-					}
-
-					// 黒背景
-					if (known && heroine.get().name.equals("黒")) {
-						t = 0;
-						continue;
-					}
-
-					// 既知ヒロインが居た場合
-					if (known && !heroine.get().name.equals("黒")) {
-
-						// キャッチヒロインに指定されている場合終了
-						if (listHeroines.getSelectedValuesList().stream()
-							.map(o -> o)
-							.filter(b -> b.equals(heroine.get().name))
-							.findAny()
-							.isPresent()) {
-							SwingUtilities.invokeLater(() -> {
-								setStatusBar("指定のヒロインです。");
+								setStatusBar(res.getY());
 							});
 							return;
 						}
 
-						// キャッチクラスに指定されている場合終了
-						if (listButtleClass.getSelectedValuesList().stream()
-							.map(o -> o)
-							.filter(b -> b.equals(heroine.get().getButtleClass()))
-							.findAny()
-							.isPresent()) {
-							SwingUtilities.invokeLater(() -> {
-								setStatusBar("指定のクラスのヒロインです。");
-							});
-							return;
+						if (res.getX() == EnumPluginSearchCondition.WAITING) {
+							skippable = false;
 						}
 
-						// 飛ばしてよい
+					}
+
+					if (skippable) {
 
 						// 回数オーバーなら終了
 						if (skipLimit <= 0) {
@@ -522,6 +693,8 @@ public class GUNoelle
 								});
 								return;
 							}
+
+							plugins.forEach(IPluginSearch::onSkipped);
 						}
 
 						t = 0;
@@ -650,9 +823,16 @@ public class GUNoelle
 
 					// 経験値文字列取得
 					{
-						Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> result = ISyntax.parseNoelle(guScreen.get().getImage(), 20, 123);
+						{
+							Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> result = ISyntax.parseNoelle(guScreen.get().getImage(), 20, 123);
+							resultExperimentPoints = result == null ? null : new Tuple4<>(
+								result.getX(),
+								result.getY(),
+								result.getZ().orElse(1.0),
+								result.getW().orElse(0));
+						}
 
-						if (result == null) {
+						if (resultExperimentPoints == null) {
 							labelExperimentPoints.setText("<html></html>");
 						} else {
 							labelExperimentPoints.setText(String.format("<html>"
@@ -661,10 +841,10 @@ public class GUNoelle
 								+ "<tr><td>経験値倍率</td><td>%s</td></tr>"
 								+ "<tr><td>封印石ボーナス</td><td>%s</td></tr>"
 								+ "</html>",
-								result.getX(),
-								result.getY(),
-								result.getZ().orElse(1.0),
-								result.getW().orElse(0)));
+								resultExperimentPoints.getX(),
+								resultExperimentPoints.getY(),
+								resultExperimentPoints.getZ(),
+								resultExperimentPoints.getW()));
 						}
 
 					}
@@ -674,6 +854,7 @@ public class GUNoelle
 					faceLabelGuessed.setIcon(null);
 					known = false;
 					labelFaceParameters.setText("<html></html>");
+					resultExperimentPoints = null;
 					labelExperimentPoints.setText("<html></html>");
 				}
 			} else {
@@ -683,6 +864,7 @@ public class GUNoelle
 				faceLabelGuessed.setIcon(null);
 				known = false;
 				labelFaceParameters.setText("<html></html>");
+				resultExperimentPoints = null;
 				labelExperimentPoints.setText("<html></html>");
 			}
 
