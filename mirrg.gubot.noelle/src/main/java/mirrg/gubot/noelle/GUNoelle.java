@@ -312,7 +312,7 @@ public class GUNoelle
 									labelExperimentPoints = new JLabel();
 									labelExperimentPoints.setBackground(Color.white);
 									labelExperimentPoints.setOpaque(true);
-									labelExperimentPoints.setPreferredSize(new Dimension(200, 90));
+									labelExperimentPoints.setPreferredSize(new Dimension(200, 105));
 									return labelExperimentPoints;
 								})),
 							createBorderPanelUp(
@@ -866,11 +866,13 @@ public class GUNoelle
 								+ "<tr><td>ヒロイン経験値</td><td>%s</td></tr>"
 								+ "<tr><td>経験値倍率</td><td>%s</td></tr>"
 								+ "<tr><td>封印石ボーナス</td><td>%s</td></tr>"
+								+ "<tr><td>基礎経験値</td><td>%s</td></tr>"
 								+ "</html>",
 								resultExperimentPoints.getX(),
 								resultExperimentPoints.getY(),
 								resultExperimentPoints.getZ(),
-								resultExperimentPoints.getW()));
+								resultExperimentPoints.getW(),
+								resultExperimentPoints.getY() / resultExperimentPoints.getZ()));
 						}
 
 					}
