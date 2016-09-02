@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 
 import mirrg.gubot.noelle.RegistryHeroine;
-import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class RegistryGlyph
 {

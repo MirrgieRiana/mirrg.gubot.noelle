@@ -50,10 +50,10 @@ import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
 import mirrg.gubot.noelle.screen.Island;
-import mirrg.struct.hydrogen.v1_0.Tuple;
-import mirrg.struct.hydrogen.v1_0.Tuple4;
-import mirrg.swing.neon.v1_1.artifacts.logging.FrameLog;
-import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
+import mirrg.helium.standard.hydrogen.struct.Tuple;
+import mirrg.helium.standard.hydrogen.struct.Tuple4;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.FrameLog;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class GUNoelle
 {

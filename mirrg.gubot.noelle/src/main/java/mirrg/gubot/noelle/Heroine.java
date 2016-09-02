@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class Heroine
 {

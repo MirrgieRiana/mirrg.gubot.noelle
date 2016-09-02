@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import mirrg.struct.hydrogen.v1_0.Tuple4;
+import mirrg.helium.standard.hydrogen.struct.Tuple4;
 
 public interface ISyntax<T>
 {

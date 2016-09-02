@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.gubot.noelle.Helpers;
-import mirrg.swing.neon.v1_1.artifacts.logging.HLog;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public abstract class GUScreen
 {
