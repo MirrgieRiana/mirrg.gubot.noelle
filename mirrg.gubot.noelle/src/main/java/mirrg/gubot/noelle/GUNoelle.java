@@ -1,6 +1,6 @@
 package mirrg.gubot.noelle;
 
-import static mirrg.gubot.noelle.HSwing.*;
+import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.AWTException;
 import java.awt.CardLayout;
@@ -259,7 +259,7 @@ public class GUNoelle
 			frameMain.add(
 
 				createBorderPanelDown(
-					createVerticalSplitPane(
+					createSplitPaneVertical(
 						createBorderPanelDown(
 							get(() -> {
 								listBlackPixels = new JList<>();
@@ -277,7 +277,7 @@ public class GUNoelle
 								labelSelecting.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
 								return labelSelecting;
 							})),
-						process(createVerticalSplitPane(
+						process(createSplitPaneVertical(
 							createBorderPanelUp(
 								createBorderPanelLeft(
 									createPanel(get(() -> {
@@ -395,7 +395,7 @@ public class GUNoelle
 											((JSpinner.DefaultEditor) spinnerStoneBonusMin.getEditor()).getTextField().setColumns(2);
 											return spinnerStoneBonusMin;
 										}))),
-								createHorizontalSplitPane(
+								createSplitPaneHorizontal(
 									createBorderPanelUp(
 										createPanel(get(() -> {
 											faceLabelSelected = new FaceLabel();
