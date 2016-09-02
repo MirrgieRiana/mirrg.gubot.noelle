@@ -100,7 +100,7 @@ public interface ISyntax<T>
 	 */
 	public static <T> ISyntaxSerial<T> se(Function<Hashtable<String, Object>, T> mapper)
 	{
-		return new ISyntaxSerial<T>(mapper);
+		return new ISyntaxSerial<>(mapper);
 	}
 
 	public static class ISyntaxSerial<T> implements ISyntax<T>
@@ -151,7 +151,7 @@ public interface ISyntax<T>
 
 	public static <T> ISyntaxOr<T> or(T dummy)
 	{
-		return new ISyntaxOr<T>(false);
+		return new ISyntaxOr<>(false);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public interface ISyntax<T>
 	 */
 	public static <T> ISyntaxOr<T> orEx(T dummy)
 	{
-		return new ISyntaxOr<T>(true);
+		return new ISyntaxOr<>(true);
 	}
 
 	public static class ISyntaxOr<T> implements ISyntax<T>

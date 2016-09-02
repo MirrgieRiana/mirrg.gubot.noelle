@@ -1057,6 +1057,11 @@ public class GUNoelle
 	private static class FaceLabel extends ScreenLabel
 	{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1245428170172803632L;
+
 		public FaceLabel()
 		{
 			super(64, 64);
@@ -1066,6 +1071,11 @@ public class GUNoelle
 
 	private static class ScreenLabel extends JLabel
 	{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2415051591221706988L;
 
 		public ScreenLabel(int width, int height)
 		{
