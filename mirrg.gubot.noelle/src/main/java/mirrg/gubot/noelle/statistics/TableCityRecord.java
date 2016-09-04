@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class TableCityRecord extends JTable
 {
@@ -50,9 +53,16 @@ public class TableCityRecord extends JTable
 		tableModel.setValueAt(city.stoneBonus, city.rowIndex, 5);
 	}
 
+	@SuppressWarnings("resource")
 	public void export(File file) throws FileNotFoundException
 	{
-		PrintStream out = new PrintStream(new FileOutputStream(file));
+		PrintStream out;
+		try {
+			out = new PrintStream(new FileOutputStream(file), true, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			HLog.processException(e);
+			return;
+		}
 		out.println("Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus");
 		cities.forEach(c -> {
 			out.println(String.format("%s,%s,%s,%s,%s,%s",
