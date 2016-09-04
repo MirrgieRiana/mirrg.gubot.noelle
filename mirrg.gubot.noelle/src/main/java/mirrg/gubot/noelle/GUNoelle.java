@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +29,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -50,6 +52,8 @@ import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
 import mirrg.gubot.noelle.screen.Island;
+import mirrg.gubot.noelle.statistics.City;
+import mirrg.gubot.noelle.statistics.TableCityRecord;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple4;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.FrameLog;
@@ -113,10 +117,15 @@ public class GUNoelle
 	protected JDialog dialogScreen;
 	protected JLabel labelGUScreen;
 
+	protected JDialog dialogCityRecord;
+	protected TableCityRecord tableCityRecord;
+
 	protected volatile Optional<GUScreen> guScreen = Optional.empty();
 	protected volatile boolean isSelecting;
 	protected volatile Optional<Heroine> heroine;
 	protected volatile boolean known;
+	protected volatile boolean phase = false;
+	protected volatile City city;
 
 	public GUNoelle(int height, int width)
 	{
@@ -215,6 +224,13 @@ public class GUNoelle
 						menuItem.addActionListener(e -> {
 							dialogScreen.pack();
 							dialogScreen.setVisible(!dialogScreen.isVisible());
+						});
+						menu.add(menuItem);
+					}
+					{
+						JMenuItem menuItem = new JMenuItem("統計情報");
+						menuItem.addActionListener(e -> {
+							dialogCityRecord.setVisible(!dialogCityRecord.isVisible());
 						});
 						menu.add(menuItem);
 					}
@@ -457,6 +473,36 @@ public class GUNoelle
 			dialogScreen.setResizable(false);
 			dialogScreen.setLocationByPlatform(true);
 			dialogScreen.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		}
+
+		{
+			dialogCityRecord = new JDialog(frameMain, "統計情報");
+
+			dialogCityRecord.setLayout(new CardLayout());
+			dialogCityRecord.add(createBorderPanelDown(
+				get(() -> {
+					tableCityRecord = new TableCityRecord();
+					return createScrollPane(tableCityRecord, 300, 500);
+				}),
+				createBorderPanelRight(
+					null,
+					get(() -> {
+						JFileChooser fileChooser = new JFileChooser(new File("."));
+						return createButton("エクスポート", e -> {
+							int res = fileChooser.showSaveDialog(dialogCityRecord);
+							if (res == JFileChooser.APPROVE_OPTION) {
+								try {
+									tableCityRecord.export(fileChooser.getSelectedFile());
+								} catch (FileNotFoundException e1) {
+									HLog.processException(e1);
+								}
+							}
+						});
+					}))));
+
+			dialogCityRecord.pack();
+			dialogCityRecord.setLocationByPlatform(true);
+			dialogCityRecord.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		}
 
 		initThreadUpdateEvent();
@@ -810,26 +856,37 @@ public class GUNoelle
 				if (isSelecting) {
 
 					// ヒロイン候補があるかどうか
-					Optional<Tuple<Heroine, Double>> heroin2;
+					Optional<Tuple<Heroine, Double>> heroine2;
 					{
-						ArrayList<Tuple<Heroine, Double>> heroins = RegistryHeroine.getHeroines()
+						ArrayList<Tuple<Heroine, Double>> heroines = RegistryHeroine.getHeroines()
 							.map(h -> new Tuple<>(h, h.getDistance(imageFaceToMatch, 250)))
 							//.filter(h -> h.getY() < 250)
 							.sorted((a, b) -> (int) Math.signum(a.getY() - b.getY()))
 							.collect(Collectors.toCollection(ArrayList::new));
-						heroin2 = heroins.stream()
+						heroine2 = heroines.stream()
 							.findFirst();
 
-						heroine = heroin2.map(Tuple::getX);
+						heroine = heroine2.map(Tuple::getX);
 					}
 
 					// ★最有力候補のヒロインについて常時更新
-					if (heroin2.isPresent()) {
+					if (heroine2.isPresent()) {
 						faceLabelGuessed.setIcon(new ImageIcon(heroine.get().image));
 
 						// このヒロインについて既知といえるか
-						double distance = heroin2.get().getY();
+						double distance = heroine2.get().getY();
 						known = distance < 250;
+						if (known) {
+							boolean newPhase = !heroine.get().name.equals("黒");
+
+							if (!phase && newPhase) {
+								city = new City();
+								city.heroine = heroine.get();
+								tableCityRecord.add(city);
+							}
+
+							phase = newPhase;
+						}
 						labelFaceParameters.setText(String.format("<html><table>"
 							+ "<tr><td>Name</td><td>%s</td></tr>"
 							+ "<tr><td>距離</td><td>%.6f</td></tr>"
@@ -873,6 +930,14 @@ public class GUNoelle
 								resultExperimentPoints.getZ(),
 								resultExperimentPoints.getW(),
 								resultExperimentPoints.getY() / resultExperimentPoints.getZ()));
+							if (city != null) {
+								city.captainExperience = resultExperimentPoints.getX();
+								city.heroineExperience = resultExperimentPoints.getY();
+								city.experienceRatio = resultExperimentPoints.getZ();
+								city.stoneBonus = resultExperimentPoints.getW();
+								city.baseExperience = resultExperimentPoints.getY() / resultExperimentPoints.getZ();
+								city.repaint();
+							}
 						}
 
 					}
@@ -1058,7 +1123,7 @@ public class GUNoelle
 	{
 
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -1245428170172803632L;
 
@@ -1073,7 +1138,7 @@ public class GUNoelle
 	{
 
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 2415051591221706988L;
 
