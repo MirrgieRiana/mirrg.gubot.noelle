@@ -47,7 +47,6 @@ import javax.swing.border.BevelBorder;
 
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
-import mirrg.gubot.noelle.glyph.ISyntax;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
@@ -907,7 +906,7 @@ public class GUNoelle
 					// 経験値文字列取得
 					{
 						{
-							Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> result = ISyntax.parseNoelle(guScreen.get().getImage(), 20, 123);
+							Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> result = TableCityRecord.parseExperience(guScreen.get().getImage(), 20, 123);
 							resultExperimentPoints = result == null ? null : new Tuple4<>(
 								result.getX(),
 								result.getY(),
