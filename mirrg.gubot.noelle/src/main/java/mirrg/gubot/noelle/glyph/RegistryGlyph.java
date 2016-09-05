@@ -19,9 +19,13 @@ public class RegistryGlyph
 
 	public static final Pattern PATTERN_CSV_CELL = Pattern.compile(",?([^,]+)");
 
-	private static Hashtable<String, GlyphSet> glyphSets = new Hashtable<>();
-	static {
-		File dir = new File("glyphs");
+	public static RegistryGlyph normal = new RegistryGlyph(new File("glyphs/normal"));
+	public static RegistryGlyph small = new RegistryGlyph(new File("glyphs/small"));
+
+	private Hashtable<String, GlyphSet> glyphSets = new Hashtable<>();
+
+	public RegistryGlyph(File dir)
+	{
 		Stream.of(dir.listFiles())
 			.forEach(f -> {
 				Matcher matcher = RegistryHeroine.PATTERN_FILENAME_BODY.matcher(f.getName());
@@ -49,18 +53,18 @@ public class RegistryGlyph
 			});
 	}
 
-	public static Stream<GlyphSet> getGlyphSets()
+	public Stream<GlyphSet> getGlyphSets()
 	{
 		return glyphSets.entrySet().stream()
 			.map(e -> e.getValue());
 	}
 
-	public static GlyphSet getGlyphSet(String key)
+	public GlyphSet getGlyphSet(String key)
 	{
 		return glyphSets.get(key);
 	}
 
-	public static Stream<Glyph> getGlyphs()
+	public Stream<Glyph> getGlyphs()
 	{
 		return getGlyphSets()
 			.flatMap(s -> s.stream());

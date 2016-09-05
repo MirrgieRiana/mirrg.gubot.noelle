@@ -45,28 +45,28 @@ public interface ISyntax<T>
 	public static Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> parseNoelle(BufferedImage image, int x, int y)
 	{
 		Function<EnumGlyphColor[], ISyntax<Glyph>> decimal = color -> orEx((Glyph) null)
-			.or(ch("0", color))
-			.or(ch("1", color))
-			.or(ch("2", color))
-			.or(ch("3", color))
-			.or(ch("4", color))
-			.or(ch("5", color))
-			.or(ch("6", color))
-			.or(ch("7", color))
-			.or(ch("8", color))
-			.or(ch("9", color));
+			.or(ch(RegistryGlyph.normal, "0", color))
+			.or(ch(RegistryGlyph.normal, "1", color))
+			.or(ch(RegistryGlyph.normal, "2", color))
+			.or(ch(RegistryGlyph.normal, "3", color))
+			.or(ch(RegistryGlyph.normal, "4", color))
+			.or(ch(RegistryGlyph.normal, "5", color))
+			.or(ch(RegistryGlyph.normal, "6", color))
+			.or(ch(RegistryGlyph.normal, "7", color))
+			.or(ch(RegistryGlyph.normal, "8", color))
+			.or(ch(RegistryGlyph.normal, "9", color));
 		ISyntax<Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>>> syntax = se(hash -> new Tuple4<>(
 			(Integer) hash.get("1"),
 			(Integer) hash.get("2"),
 			(Optional<Double>) hash.get("3"),
 			(Optional<Integer>) hash.get("4")))
-				.and(ch("領主の獲得可能経験値：", EnumGlyphColor.WHITE))
+				.and(ch(RegistryGlyph.normal, "領主の獲得可能経験値：", EnumGlyphColor.WHITE))
 				.and(na("1", ma(re1(decimal.apply(co(EnumGlyphColor.WHITE, EnumGlyphColor.ORANGE))),
 					list -> Integer.parseInt(list.stream()
 						.map(g -> g.value)
 						.collect(Collectors.joining()), 10))))
 				.and(br())
-				.and(ch("ヒロインの獲得可能経験値：", EnumGlyphColor.WHITE))
+				.and(ch(RegistryGlyph.normal, "ヒロインの獲得可能経験値：", EnumGlyphColor.WHITE))
 				.and(na("2", ma(re1(decimal.apply(co(EnumGlyphColor.WHITE, EnumGlyphColor.ORANGE))),
 					list -> Integer.parseInt(list.stream()
 						.map(g -> g.value)
@@ -75,20 +75,20 @@ public interface ISyntax<T>
 				.and(na("3", op(or((Double) null)
 					.or(se(hash -> Double.parseDouble(((Glyph) hash.get("1")).value + "." + ((Glyph) hash.get("2")).value))
 						.and(na("1", decimal.apply(co(EnumGlyphColor.ORANGE))))
-						.and(ch(".", EnumGlyphColor.ORANGE))
+						.and(ch(RegistryGlyph.normal, ".", EnumGlyphColor.ORANGE))
 						.and(na("2", decimal.apply(co(EnumGlyphColor.ORANGE))))
-						.and(ch("倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
+						.and(ch(RegistryGlyph.normal, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
 						.and(br()))
 					.or(se(hash -> Double.parseDouble(((Glyph) hash.get("1")).value))
 						.and(na("1", decimal.apply(co(EnumGlyphColor.ORANGE))))
-						.and(ch("倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
+						.and(ch(RegistryGlyph.normal, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
 						.and(br())))))
 				.and(na("4", op(or((Integer) null)
 					.or(se(hash -> 1)
-						.and(ch("封印石獲得率↑", EnumGlyphColor.PINK))
+						.and(ch(RegistryGlyph.normal, "封印石獲得率↑", EnumGlyphColor.PINK))
 						.and(br()))
 					.or(se(hash -> 2)
-						.and(ch("封印石獲得率↑↑", EnumGlyphColor.RED))
+						.and(ch(RegistryGlyph.normal, "封印石獲得率↑↑", EnumGlyphColor.RED))
 						.and(br())))));
 		Result<Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>>> result = syntax.match(image, x, y);
 		if (result == null) return null;
@@ -337,13 +337,13 @@ public interface ISyntax<T>
 	/**
 	 * character
 	 */
-	public static ISyntax<Glyph> ch(String character, EnumGlyphColor... colors)
+	public static ISyntax<Glyph> ch(RegistryGlyph registry, String character, EnumGlyphColor... colors)
 	{
 		return (image, x, x2, y, isFixed) -> {
 
 			for (EnumGlyphColor color : colors) {
 				if (isFixed) {
-					Glyph glyph = RegistryGlyph.getGlyphSet(character).get(color, 0);
+					Glyph glyph = registry.getGlyphSet(character).get(color, 0);
 
 					BufferedImage image2 = image.getSubimage(x2 - 1, y - 1, glyph.image.getWidth(), glyph.image.getHeight());
 					double distanceSq = glyph.getDistanceSq(image2, isFixed);
@@ -353,7 +353,7 @@ public interface ISyntax<T>
 
 				} else {
 					for (int i = 0; i < GlyphSet.DIV; i++) {
-						Glyph glyph = RegistryGlyph.getGlyphSet(character).get(color, i);
+						Glyph glyph = registry.getGlyphSet(character).get(color, i);
 
 						BufferedImage image2 = image.getSubimage(x2 - 1, y - 1, glyph.image.getWidth(), glyph.image.getHeight());
 						double distanceSq = glyph.getDistanceSq(image2, isFixed);
