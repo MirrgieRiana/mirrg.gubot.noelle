@@ -42,18 +42,18 @@ public interface ISyntax<T>
 	/**
 	 * serial
 	 */
-	public static <T> ISyntaxSerial<T> se(Function<Hashtable<String, Object>, T> mapper)
+	public static <T> SyntaxSerial<T> se(Function<Hashtable<String, Object>, T> mapper)
 	{
-		return new ISyntaxSerial<>(mapper);
+		return new SyntaxSerial<>(mapper);
 	}
 
-	public static class ISyntaxSerial<T> implements ISyntax<T>
+	public static class SyntaxSerial<T> implements ISyntax<T>
 	{
 
 		private Function<Hashtable<String, Object>, T> mapper;
 		private ArrayList<ISyntax<?>> syntaxes = new ArrayList<>();
 
-		public ISyntaxSerial(Function<Hashtable<String, Object>, T> mapper)
+		public SyntaxSerial(Function<Hashtable<String, Object>, T> mapper)
 		{
 			this.mapper = mapper;
 		}
@@ -85,7 +85,7 @@ public interface ISyntax<T>
 			return new Result<>(mapper.apply(hash), x, x2, y, isFixed, distanceSq);
 		}
 
-		public ISyntaxSerial<T> and(ISyntax<?> syntax)
+		public SyntaxSerial<T> and(ISyntax<?> syntax)
 		{
 			syntaxes.add(syntax);
 			return this;
@@ -93,27 +93,27 @@ public interface ISyntax<T>
 
 	}
 
-	public static <T> ISyntaxOr<T> or(T dummy)
+	public static <T> SyntaxOr<T> or(T dummy)
 	{
-		return new ISyntaxOr<>(false);
+		return new SyntaxOr<>(false);
 	}
 
 	/**
 	 * or extra
 	 * 候補のうち最も距離が短いものを選択
 	 */
-	public static <T> ISyntaxOr<T> orEx(T dummy)
+	public static <T> SyntaxOr<T> orEx(T dummy)
 	{
-		return new ISyntaxOr<>(true);
+		return new SyntaxOr<>(true);
 	}
 
-	public static class ISyntaxOr<T> implements ISyntax<T>
+	public static class SyntaxOr<T> implements ISyntax<T>
 	{
 
 		private boolean isExtra;
 		private ArrayList<ISyntax<? extends T>> syntaxes = new ArrayList<>();
 
-		public ISyntaxOr(boolean isExtra)
+		public SyntaxOr(boolean isExtra)
 		{
 			this.isExtra = isExtra;
 		}
@@ -160,7 +160,7 @@ public interface ISyntax<T>
 			}
 		}
 
-		public ISyntaxOr<T> or(ISyntax<? extends T> syntax)
+		public SyntaxOr<T> or(ISyntax<? extends T> syntax)
 		{
 			syntaxes.add(syntax);
 			return this;
