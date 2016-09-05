@@ -19,13 +19,18 @@ public class RegistryGlyph
 
 	public static final Pattern PATTERN_CSV_CELL = Pattern.compile(",?([^,]+)");
 
-	public static RegistryGlyph normal = new RegistryGlyph(new File("glyphs/normal"));
-	public static RegistryGlyph small = new RegistryGlyph(new File("glyphs/small"));
+	public static RegistryGlyph normal = new RegistryGlyph(new File("glyphs/normal"), 16, 12000);
+	public static RegistryGlyph small = new RegistryGlyph(new File("glyphs/small"), 32, 60000);
 
 	private Hashtable<String, GlyphSet> glyphSets = new Hashtable<>();
 
-	public RegistryGlyph(File dir)
+	public int div;
+	public int distanceLimit;
+
+	public RegistryGlyph(File dir, int div, int distanceLimit)
 	{
+		this.div = div;
+		this.distanceLimit = distanceLimit;
 		Stream.of(dir.listFiles())
 			.forEach(f -> {
 				Matcher matcher = RegistryHeroine.PATTERN_FILENAME_BODY.matcher(f.getName());
@@ -47,7 +52,7 @@ public class RegistryGlyph
 						throw new RuntimeException(e);
 					}
 
-					glyphSets.put(cells.get(0), new GlyphSet(cells.get(0), image, cells.indexOf("fixed") >= 1));
+					glyphSets.put(cells.get(0), new GlyphSet(cells.get(0), image, cells.indexOf("fixed") >= 1, div, distanceLimit));
 
 				}
 			});

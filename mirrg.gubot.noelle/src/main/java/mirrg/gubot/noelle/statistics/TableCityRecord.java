@@ -40,6 +40,8 @@ public class TableCityRecord extends JTable
 			tableModel.addColumn("ベース経験値");
 			tableModel.addColumn("経験値倍率");
 			tableModel.addColumn("封印石ボーナス");
+			tableModel.addColumn("ゴールド");
+			tableModel.addColumn("マナ");
 		}
 		setModel(tableModel);
 	}
@@ -57,12 +59,15 @@ public class TableCityRecord extends JTable
 
 	public void repaint(City city)
 	{
-		tableModel.setValueAt(city.heroine.name, city.rowIndex, 0);
-		tableModel.setValueAt(city.captainExperience, city.rowIndex, 1);
-		tableModel.setValueAt(city.heroineExperience, city.rowIndex, 2);
-		tableModel.setValueAt(city.baseExperience, city.rowIndex, 3);
-		tableModel.setValueAt(city.experienceRatio, city.rowIndex, 4);
-		tableModel.setValueAt(city.stoneBonus, city.rowIndex, 5);
+		int r = city.rowIndex;
+		tableModel.setValueAt(city.heroine.name, r, 0);
+		tableModel.setValueAt(city.captainExperience, r, 1);
+		tableModel.setValueAt(city.heroineExperience, r, 2);
+		tableModel.setValueAt(city.baseExperience, r, 3);
+		tableModel.setValueAt(city.experienceRatio, r, 4);
+		tableModel.setValueAt(city.stoneBonus, r, 5);
+		tableModel.setValueAt(city.gold, r, 6);
+		tableModel.setValueAt(city.mana, r, 7);
 	}
 
 	@SuppressWarnings("resource")
@@ -75,7 +80,7 @@ public class TableCityRecord extends JTable
 			HLog.processException(e);
 			return;
 		}
-		out.println("Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus");
+		out.println("Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana");
 		cities.forEach(c -> {
 			out.println(String.format("%s,%s,%s,%s,%s,%s",
 				c.heroine.name,
@@ -83,36 +88,39 @@ public class TableCityRecord extends JTable
 				c.heroineExperience,
 				c.baseExperience,
 				c.experienceRatio,
-				c.stoneBonus));
+				c.stoneBonus,
+				c.gold,
+				c.mana));
 		});
 		out.close();
 	}
 
 	public static Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> parseExperience(BufferedImage image, int x, int y)
 	{
+		RegistryGlyph registry = RegistryGlyph.normal;
 		Function<EnumGlyphColor[], ISyntax<Glyph>> decimal = color -> orEx((Glyph) null)
-			.or(ch(RegistryGlyph.normal, "0", color))
-			.or(ch(RegistryGlyph.normal, "1", color))
-			.or(ch(RegistryGlyph.normal, "2", color))
-			.or(ch(RegistryGlyph.normal, "3", color))
-			.or(ch(RegistryGlyph.normal, "4", color))
-			.or(ch(RegistryGlyph.normal, "5", color))
-			.or(ch(RegistryGlyph.normal, "6", color))
-			.or(ch(RegistryGlyph.normal, "7", color))
-			.or(ch(RegistryGlyph.normal, "8", color))
-			.or(ch(RegistryGlyph.normal, "9", color));
+			.or(ch(registry, "0", color))
+			.or(ch(registry, "1", color))
+			.or(ch(registry, "2", color))
+			.or(ch(registry, "3", color))
+			.or(ch(registry, "4", color))
+			.or(ch(registry, "5", color))
+			.or(ch(registry, "6", color))
+			.or(ch(registry, "7", color))
+			.or(ch(registry, "8", color))
+			.or(ch(registry, "9", color));
 		ISyntax<Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>>> syntax = se(hash -> new Tuple4<>(
 			(Integer) hash.get("1"),
 			(Integer) hash.get("2"),
 			(Optional<Double>) hash.get("3"),
 			(Optional<Integer>) hash.get("4")))
-				.and(ch(RegistryGlyph.normal, "領主の獲得可能経験値：", EnumGlyphColor.WHITE))
+				.and(ch(registry, "領主の獲得可能経験値：", EnumGlyphColor.WHITE))
 				.and(na("1", ma(re1(decimal.apply(co(EnumGlyphColor.WHITE, EnumGlyphColor.ORANGE))),
 					list -> Integer.parseInt(list.stream()
 						.map(g -> g.value)
 						.collect(Collectors.joining()), 10))))
 				.and(br())
-				.and(ch(RegistryGlyph.normal, "ヒロインの獲得可能経験値：", EnumGlyphColor.WHITE))
+				.and(ch(registry, "ヒロインの獲得可能経験値：", EnumGlyphColor.WHITE))
 				.and(na("2", ma(re1(decimal.apply(co(EnumGlyphColor.WHITE, EnumGlyphColor.ORANGE))),
 					list -> Integer.parseInt(list.stream()
 						.map(g -> g.value)
@@ -121,22 +129,74 @@ public class TableCityRecord extends JTable
 				.and(na("3", op(or((Double) null)
 					.or(se(hash -> Double.parseDouble(((Glyph) hash.get("1")).value + "." + ((Glyph) hash.get("2")).value))
 						.and(na("1", decimal.apply(co(EnumGlyphColor.ORANGE))))
-						.and(ch(RegistryGlyph.normal, ".", EnumGlyphColor.ORANGE))
+						.and(ch(registry, ".", EnumGlyphColor.ORANGE))
 						.and(na("2", decimal.apply(co(EnumGlyphColor.ORANGE))))
-						.and(ch(RegistryGlyph.normal, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
+						.and(ch(registry, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
 						.and(br()))
 					.or(se(hash -> Double.parseDouble(((Glyph) hash.get("1")).value))
 						.and(na("1", decimal.apply(co(EnumGlyphColor.ORANGE))))
-						.and(ch(RegistryGlyph.normal, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
+						.and(ch(registry, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
 						.and(br())))))
 				.and(na("4", op(or((Integer) null)
 					.or(se(hash -> 1)
-						.and(ch(RegistryGlyph.normal, "封印石獲得率↑", EnumGlyphColor.PINK))
+						.and(ch(registry, "封印石獲得率↑", EnumGlyphColor.PINK))
 						.and(br()))
 					.or(se(hash -> 2)
-						.and(ch(RegistryGlyph.normal, "封印石獲得率↑↑", EnumGlyphColor.RED))
+						.and(ch(registry, "封印石獲得率↑↑", EnumGlyphColor.RED))
 						.and(br())))));
 		Result<Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>>> result = syntax.match(image, x, y);
+		if (result == null) return null;
+		return result.value;
+	}
+
+	public static Integer parseResources(BufferedImage image, int x, int y)
+	{
+		RegistryGlyph registry = RegistryGlyph.small;
+		ISyntax<Glyph> decimal = orEx((Glyph) null)
+			.or(ch(registry, "0", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "1", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "2", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "3", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "4", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "5", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "6", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "7", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "8", co(EnumGlyphColor.WHITE)))
+			.or(ch(registry, "9", co(EnumGlyphColor.WHITE)));
+		ISyntax<Glyph> decimal2 = orEx((Glyph) null)
+			.or(decimal)
+			.or(se(hash -> (Glyph) hash.get("1"))
+				.and(sp(1))
+				.and(na("1", decimal)));
+		ISyntax<Integer> decimals = ma(re1(decimal2), gs -> Integer.parseInt(gs.stream()
+			.map(g -> g.value)
+			.collect(Collectors.joining()), 10));
+		ISyntax<Integer> syntax = or((Integer) null)
+			.or(se(hash -> (Integer) hash.get("1"))
+				.and(subPixelize())
+				.and(sp(0))
+				.and(na("1", decimals)))
+			.or(se(hash -> (Integer) hash.get("1"))
+				.and(subPixelize())
+				.and(sp(8))
+				.and(na("1", decimals)))
+			.or(se(hash -> (Integer) hash.get("1"))
+				.and(subPixelize())
+				.and(sp(8 + 9))
+				.and(na("1", decimals)))
+			.or(se(hash -> (Integer) hash.get("1"))
+				.and(subPixelize())
+				.and(sp(8 + 9 + 8))
+				.and(na("1", decimals)))
+			.or(se(hash -> (Integer) hash.get("1"))
+				.and(subPixelize())
+				.and(sp(8 + 9 + 8 + 9))
+				.and(na("1", decimals)))
+			.or(se(hash -> (Integer) hash.get("1"))
+				.and(subPixelize())
+				.and(sp(8 + 9 + 8 + 9 + 8))
+				.and(na("1", decimals)));
+		Result<Integer> result = syntax.match(image, x, y);
 		if (result == null) return null;
 		return result.value;
 	}

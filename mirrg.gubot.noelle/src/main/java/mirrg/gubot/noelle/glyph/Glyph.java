@@ -14,14 +14,16 @@ public class Glyph
 	public final int subPixelIndex;
 	public final BufferedImage image;
 	public final boolean isFixed;
+	public final int distanceLimit;
 
-	public Glyph(String value, EnumGlyphColor color, int subPixelIndex, BufferedImage image, boolean isFixed)
+	public Glyph(String value, EnumGlyphColor color, int subPixelIndex, BufferedImage image, boolean isFixed, int distanceLimit)
 	{
 		this.value = value;
 		this.color = color;
 		this.subPixelIndex = subPixelIndex;
 		this.image = image;
 		this.isFixed = isFixed;
+		this.distanceLimit = distanceLimit;
 	}
 
 	public int getWidth()
@@ -49,9 +51,9 @@ public class Glyph
 		return sumAlpha;
 	}
 
-	public static double getDistanceLimit(boolean isFixed)
+	public double getDistanceLimit(boolean isFixed)
 	{
-		return isFixed ? 10 : 12000;
+		return isFixed ? 10 : distanceLimit;
 	}
 
 	public double getDistanceSq(BufferedImage image1, boolean isFixed)

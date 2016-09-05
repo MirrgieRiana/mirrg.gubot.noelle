@@ -14,6 +14,8 @@ public class City
 	public double baseExperience;
 	public double experienceRatio;
 	public int stoneBonus;
+	public int gold;
+	public int mana;
 
 	public void repaint()
 	{

@@ -271,6 +271,36 @@ public interface ISyntax<T>
 	}
 
 	/**
+	 * space
+	 */
+	public static ISyntax<String> sp(int width)
+	{
+		return sp(width, "");
+	}
+
+	/**
+	 * space
+	 */
+	public static ISyntax<String> sp(int width, String caption)
+	{
+		return (image, x, x2, y, isFixed) -> new Result<>(caption, x, x2 + width, y, isFixed, 0);
+	}
+
+	public static ISyntax<String> subPixelize()
+	{
+		return (image, x, x2, y, isFixed) -> new Result<>("", x, x2, y, false, 0);
+	}
+
+	/**
+	 * 基点からどれだけ横に離れてよいかを定義する。
+	 * 基点からrightまで離れている場合にマッチする。
+	 */
+	public static ISyntax<String> right(int right)
+	{
+		return (image, x, x2, y, isFixed) -> x2 - x >= right ? null : new Result<>("", x, x2, y, isFixed, 0);
+	}
+
+	/**
 	 * break line
 	 */
 	public static ISyntax<String> br()
@@ -291,17 +321,17 @@ public interface ISyntax<T>
 
 					BufferedImage image2 = image.getSubimage(x2 - 1, y - 1, glyph.image.getWidth(), glyph.image.getHeight());
 					double distanceSq = glyph.getDistanceSq(image2, isFixed);
-					if (distanceSq < Glyph.getDistanceLimit(isFixed)) {
+					if (distanceSq < registry.distanceLimit) {
 						return new Result<>(glyph, x, x2 + glyph.getTrueWidth(), y, isFixed && glyph.isFixed, distanceSq);
 					}
 
 				} else {
-					for (int i = 0; i < GlyphSet.DIV; i++) {
+					for (int i = 0; i < registry.div; i++) {
 						Glyph glyph = registry.getGlyphSet(character).get(color, i);
 
 						BufferedImage image2 = image.getSubimage(x2 - 1, y - 1, glyph.image.getWidth(), glyph.image.getHeight());
 						double distanceSq = glyph.getDistanceSq(image2, isFixed);
-						if (distanceSq < Glyph.getDistanceLimit(isFixed)) {
+						if (distanceSq < registry.distanceLimit) {
 							return new Result<>(glyph, x, x2 + glyph.getTrueWidth(), y, isFixed && glyph.isFixed, distanceSq);
 						}
 

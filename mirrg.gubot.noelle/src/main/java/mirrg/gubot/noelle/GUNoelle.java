@@ -327,7 +327,7 @@ public class GUNoelle
 									labelExperimentPoints = new JLabel();
 									labelExperimentPoints.setBackground(Color.white);
 									labelExperimentPoints.setOpaque(true);
-									labelExperimentPoints.setPreferredSize(new Dimension(200, 105));
+									labelExperimentPoints.setPreferredSize(new Dimension(200, 150));
 									return labelExperimentPoints;
 								})),
 							createBorderPanelUp(
@@ -481,7 +481,7 @@ public class GUNoelle
 			dialogCityRecord.add(createBorderPanelDown(
 				get(() -> {
 					tableCityRecord = new TableCityRecord();
-					return createScrollPane(tableCityRecord, 300, 500);
+					return createScrollPane(tableCityRecord, 400, 500);
 				}),
 				createBorderPanelRight(
 					null,
@@ -917,24 +917,33 @@ public class GUNoelle
 						if (resultExperimentPoints == null) {
 							labelExperimentPoints.setText("<html></html>");
 						} else {
+							Integer gold = TableCityRecord.parseResources(guScreen.get().getImage(), 189, 32);
+							Integer mana = TableCityRecord.parseResources(guScreen.get().getImage(), 189, 64);
+
 							labelExperimentPoints.setText(String.format("<html>"
 								+ "<tr><td>領主経験値</td><td>%s</td></tr>"
 								+ "<tr><td>ヒロイン経験値</td><td>%s</td></tr>"
 								+ "<tr><td>経験値倍率</td><td>%s</td></tr>"
 								+ "<tr><td>封印石ボーナス</td><td>%s</td></tr>"
 								+ "<tr><td>基礎経験値</td><td>%s</td></tr>"
+								+ "<tr><td>ゴールド</td><td>%s</td></tr>"
+								+ "<tr><td>マナ</td><td>%s</td></tr>"
 								+ "</html>",
 								resultExperimentPoints.getX(),
 								resultExperimentPoints.getY(),
 								resultExperimentPoints.getZ(),
 								resultExperimentPoints.getW(),
-								resultExperimentPoints.getY() / resultExperimentPoints.getZ()));
+								resultExperimentPoints.getY() / resultExperimentPoints.getZ(),
+								gold,
+								mana));
 							if (city != null) {
 								city.captainExperience = resultExperimentPoints.getX();
 								city.heroineExperience = resultExperimentPoints.getY();
 								city.experienceRatio = resultExperimentPoints.getZ();
 								city.stoneBonus = resultExperimentPoints.getW();
 								city.baseExperience = resultExperimentPoints.getY() / resultExperimentPoints.getZ();
+								city.gold = gold == null ? 0 : gold;
+								city.mana = mana == null ? 0 : mana;
 								city.repaint();
 							}
 						}
