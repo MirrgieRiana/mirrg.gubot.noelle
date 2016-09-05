@@ -86,7 +86,7 @@ public class TableCityRecord extends JTable
 		}
 		out.println("Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana");
 		cities.forEach(c -> {
-			out.println(String.format("%s,%s,%s,%s,%s,%s",
+			out.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s",
 				c.heroine.name,
 				c.captainExperience,
 				c.heroineExperience,
