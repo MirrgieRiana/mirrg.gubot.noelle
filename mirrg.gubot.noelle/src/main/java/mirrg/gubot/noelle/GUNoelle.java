@@ -120,6 +120,7 @@ public class GUNoelle
 	protected TableCityRecord tableCityRecord;
 
 	protected volatile Optional<GUScreen> guScreen = Optional.empty();
+	protected volatile long lastSelecting;
 	protected volatile boolean isSelecting;
 	protected volatile Optional<Heroine> heroine;
 	protected volatile boolean known;
@@ -842,6 +843,13 @@ public class GUNoelle
 			// ★GU画面がある場合常時更新
 			if (guScreen.isPresent()) {
 				isSelecting = guScreen.get().isSelecting();
+				if (isSelecting) {
+					lastSelecting = System.currentTimeMillis();
+				} else {
+					if (lastSelecting + 1000 < System.currentTimeMillis()) {
+						phase = false;
+					}
+				}
 
 				// 領地選択画面か否か
 				labelSelecting.setText(String.format("Distance: %s , %s",
