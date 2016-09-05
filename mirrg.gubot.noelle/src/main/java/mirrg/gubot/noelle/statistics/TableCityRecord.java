@@ -19,14 +19,18 @@ import javax.swing.table.DefaultTableModel;
 import mirrg.gubot.noelle.glyph.EnumGlyphColor;
 import mirrg.gubot.noelle.glyph.Glyph;
 import mirrg.gubot.noelle.glyph.ISyntax;
-import mirrg.gubot.noelle.glyph.ISyntax.Result;
 import mirrg.gubot.noelle.glyph.RegistryGlyph;
+import mirrg.gubot.noelle.glyph.Result;
 import mirrg.helium.standard.hydrogen.struct.Tuple4;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class TableCityRecord extends JTable
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2381871167541831774L;
 	protected DefaultTableModel tableModel;
 	public ArrayList<City> cities = new ArrayList<>();
 
