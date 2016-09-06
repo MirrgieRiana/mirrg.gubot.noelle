@@ -1,5 +1,7 @@
 package mirrg.gubot.noelle.statistics;
 
+import java.time.LocalDateTime;
+
 import mirrg.gubot.noelle.Heroine;
 
 public class City
@@ -9,6 +11,8 @@ public class City
 	protected int rowIndex;
 
 	public Heroine heroine;
+	public LocalDateTime time;
+
 	public int captainExperience;
 	public int heroineExperience;
 	public double baseExperience;

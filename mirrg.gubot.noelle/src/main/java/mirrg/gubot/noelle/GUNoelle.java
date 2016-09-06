@@ -891,6 +891,7 @@ public class GUNoelle
 							if (!phase && newPhase) {
 								city = new City();
 								city.heroine = heroine.get();
+								city.time = LocalDateTime.now();
 								tableCityRecord.add(city);
 							}
 

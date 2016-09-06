@@ -15,12 +15,14 @@ import java.util.stream.Collectors;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 import mirrg.gubot.noelle.glyph.EnumGlyphColor;
 import mirrg.gubot.noelle.glyph.Glyph;
 import mirrg.gubot.noelle.glyph.ISyntax;
 import mirrg.gubot.noelle.glyph.RegistryGlyph;
 import mirrg.gubot.noelle.glyph.Result;
+import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple4;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
@@ -37,17 +39,32 @@ public class TableCityRecord extends JTable
 	public TableCityRecord()
 	{
 		tableModel = new DefaultTableModel();
-		{
-			tableModel.addColumn("秘書");
-			tableModel.addColumn("領主経験値");
-			tableModel.addColumn("ヒロイン経験値");
-			tableModel.addColumn("ベース経験値");
-			tableModel.addColumn("経験値倍率");
-			tableModel.addColumn("封印石ボーナス");
-			tableModel.addColumn("ゴールド");
-			tableModel.addColumn("マナ");
-		}
 		setModel(tableModel);
+
+		{
+			ArrayList<Tuple<String, Integer>> columns = new ArrayList<>();
+			columns.add(new Tuple<>("日付", 70));
+			columns.add(new Tuple<>("時刻", 70));
+			columns.add(new Tuple<>("秘書", 100));
+			columns.add(new Tuple<>("領主経験値", 35));
+			columns.add(new Tuple<>("ヒロイン経験値", 40));
+			columns.add(new Tuple<>("ベース経験値", 45));
+			columns.add(new Tuple<>("経験値倍率", 20));
+			columns.add(new Tuple<>("封印石ボーナス", 20));
+			columns.add(new Tuple<>("ゴールド", 40));
+			columns.add(new Tuple<>("マナ", 40));
+			setColumns(columns);
+		}
+	}
+
+	private void setColumns(ArrayList<Tuple<String, Integer>> columns)
+	{
+		TableColumnModel cm = getColumnModel();
+
+		columns.forEach(c -> tableModel.addColumn(c.getX()));
+		columns.forEach(c -> {
+			cm.getColumn(cm.getColumnIndex(c.getX())).setPreferredWidth(c.getY());
+		});
 	}
 
 	public void add(City city)
@@ -66,22 +83,22 @@ public class TableCityRecord extends JTable
 		cities.forEach(c -> c.parent = null);
 		cities.clear();
 
-		while (tableModel.getRowCount() > 0) {
-			tableModel.removeRow(0);
-		}
+		tableModel.setRowCount(0);
 	}
 
 	public void repaint(City city)
 	{
 		int r = city.rowIndex;
-		tableModel.setValueAt(city.heroine.name, r, 0);
-		tableModel.setValueAt(city.captainExperience, r, 1);
-		tableModel.setValueAt(city.heroineExperience, r, 2);
-		tableModel.setValueAt(city.baseExperience, r, 3);
-		tableModel.setValueAt(city.experienceRatio, r, 4);
-		tableModel.setValueAt(city.stoneBonus, r, 5);
-		tableModel.setValueAt(city.gold, r, 6);
-		tableModel.setValueAt(city.mana, r, 7);
+		tableModel.setValueAt(city.time.toLocalDate(), r, 0);
+		tableModel.setValueAt(city.time.toLocalTime(), r, 1);
+		tableModel.setValueAt(city.heroine.name, r, 2);
+		tableModel.setValueAt(city.captainExperience, r, 3);
+		tableModel.setValueAt(city.heroineExperience, r, 4);
+		tableModel.setValueAt(city.baseExperience, r, 5);
+		tableModel.setValueAt(city.experienceRatio, r, 6);
+		tableModel.setValueAt(city.stoneBonus, r, 7);
+		tableModel.setValueAt(city.gold, r, 8);
+		tableModel.setValueAt(city.mana, r, 9);
 	}
 
 	@SuppressWarnings("resource")
@@ -94,9 +111,11 @@ public class TableCityRecord extends JTable
 			HLog.processException(e);
 			return;
 		}
-		out.println("Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana");
+		out.println("Date,Time,Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana");
 		cities.forEach(c -> {
-			out.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s",
+			out.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+				c.time.toLocalDate(),
+				c.time.toLocalTime(),
 				c.heroine.name,
 				c.captainExperience,
 				c.heroineExperience,
