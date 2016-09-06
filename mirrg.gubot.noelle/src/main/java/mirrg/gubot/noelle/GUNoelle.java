@@ -118,6 +118,7 @@ public class GUNoelle
 
 	protected JDialog dialogCityRecord;
 	protected TableCityRecord tableCityRecord;
+	protected JLabel labelCityRecordCount;
 
 	protected volatile Optional<GUScreen> guScreen = Optional.empty();
 	protected volatile long lastSelecting;
@@ -485,7 +486,12 @@ public class GUNoelle
 					return createScrollPane(tableCityRecord, tableCityRecord.preferredWidth, 500);
 				}),
 				createBorderPanelLeft(
-					createButton("リセット", e -> tableCityRecord.reset()),
+					createButton("リセット", e -> {
+						tableCityRecord.reset();
+						labelCityRecordCount.setText("" + tableCityRecord.getRowCount());
+					}),
+					new JLabel("要素数: "),
+					labelCityRecordCount = new JLabel("" + 0),
 					createBorderPanelRight(
 						null,
 						get(() -> {
@@ -893,6 +899,7 @@ public class GUNoelle
 								city.heroine = heroine.get();
 								city.time = LocalDateTime.now();
 								tableCityRecord.add(city);
+								labelCityRecordCount.setText("" + tableCityRecord.getRowCount());
 							}
 
 							phase = newPhase;
