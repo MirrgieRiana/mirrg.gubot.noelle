@@ -1,5 +1,8 @@
 package mirrg.gubot.noelle.screen;
 
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -62,14 +65,32 @@ public abstract class GUScreen
 		return imageSelecting;
 	}
 
+	public Rectangle getGameRegion()
+	{
+		return new Rectangle(screenX, screenY, width, height);
+	}
+
 	public void next()
 	{
-		GUNoelle.ROBOT.mouseMove(screenX + width - 35, screenY + height - 115);
+		mouseOn();
 		GUNoelle.ROBOT.mousePress(InputEvent.getMaskForButton(MouseEvent.BUTTON1));
+
 		try {
 			Thread.sleep(50);
 		} catch (InterruptedException e) {}
+
+		mouseOn();
 		GUNoelle.ROBOT.mouseRelease(InputEvent.getMaskForButton(MouseEvent.BUTTON1));
+	}
+
+	public void mouseOn()
+	{
+		GUNoelle.ROBOT.mouseMove(screenX + width - 35, screenY + height - 115);
+	}
+
+	public Point getMouseLocation()
+	{
+		return MouseInfo.getPointerInfo().getLocation();
 	}
 
 	public boolean isSelecting()

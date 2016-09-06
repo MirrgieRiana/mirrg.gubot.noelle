@@ -581,6 +581,24 @@ public class GUNoelle
 
 	}
 
+	/**
+	 * カーソルがGU画面から外れたら終わる
+	 */
+	public class PluginSearchCursor implements IPluginSearch
+	{
+
+		@Override
+		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
+		{
+			if (!guScreen.get().getGameRegion().contains(guScreen.get().getMouseLocation())) {
+				return new Tuple<>(EnumPluginSearchCondition.STOP, "カーソルが外れました。");
+			} else {
+				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
+			}
+		}
+
+	}
+
 	public class PluginSearchHeroine implements IPluginSearch
 	{
 
@@ -698,6 +716,7 @@ public class GUNoelle
 			{
 				plugins.add(new PluginSearchIconified());
 				plugins.add(new PluginSearchGUScreen());
+				plugins.add(new PluginSearchCursor());
 				plugins.add(new PluginSearchHeroine());
 				plugins.add(new PluginSearchExperiencePoints());
 			}
@@ -706,6 +725,8 @@ public class GUNoelle
 				setStatusBar("");
 				labelSearching.setText("実行中");
 			});
+
+			if (guScreen.isPresent()) guScreen.get().mouseOn();
 
 			try {
 				while (true) {
