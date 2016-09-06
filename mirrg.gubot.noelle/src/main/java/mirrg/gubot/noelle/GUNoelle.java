@@ -482,7 +482,7 @@ public class GUNoelle
 			dialogCityRecord.add(createBorderPanelDown(
 				get(() -> {
 					tableCityRecord = new TableCityRecord();
-					return createScrollPane(tableCityRecord, 400, 500);
+					return createScrollPane(tableCityRecord, tableCityRecord.preferredWidth, 500);
 				}),
 				createBorderPanelLeft(
 					createButton("リセット", e -> tableCityRecord.reset()),

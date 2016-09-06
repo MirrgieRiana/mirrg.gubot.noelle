@@ -57,6 +57,8 @@ public class TableCityRecord extends JTable
 		}
 	}
 
+	public int preferredWidth;
+
 	private void setColumns(ArrayList<Tuple<String, Integer>> columns)
 	{
 		TableColumnModel cm = getColumnModel();
@@ -65,6 +67,10 @@ public class TableCityRecord extends JTable
 		columns.forEach(c -> {
 			cm.getColumn(cm.getColumnIndex(c.getX())).setPreferredWidth(c.getY());
 		});
+
+		preferredWidth = columns.stream()
+			.mapToInt(Tuple::getY)
+			.sum();
 	}
 
 	public void add(City city)
