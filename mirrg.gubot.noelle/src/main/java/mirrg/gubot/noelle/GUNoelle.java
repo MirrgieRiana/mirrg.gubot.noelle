@@ -484,21 +484,23 @@ public class GUNoelle
 					tableCityRecord = new TableCityRecord();
 					return createScrollPane(tableCityRecord, 400, 500);
 				}),
-				createBorderPanelRight(
-					null,
-					get(() -> {
-						JFileChooser fileChooser = new JFileChooser(new File("."));
-						return createButton("エクスポート", e -> {
-							int res = fileChooser.showSaveDialog(dialogCityRecord);
-							if (res == JFileChooser.APPROVE_OPTION) {
-								try {
-									tableCityRecord.export(fileChooser.getSelectedFile());
-								} catch (FileNotFoundException e1) {
-									HLog.processException(e1);
+				createBorderPanelLeft(
+					createButton("リセット", e -> tableCityRecord.reset()),
+					createBorderPanelRight(
+						null,
+						get(() -> {
+							JFileChooser fileChooser = new JFileChooser(new File("."));
+							return createButton("エクスポート", e -> {
+								int res = fileChooser.showSaveDialog(dialogCityRecord);
+								if (res == JFileChooser.APPROVE_OPTION) {
+									try {
+										tableCityRecord.export(fileChooser.getSelectedFile());
+									} catch (FileNotFoundException e1) {
+										HLog.processException(e1);
+									}
 								}
-							}
-						});
-					}))));
+							});
+						})))));
 
 			dialogCityRecord.pack();
 			dialogCityRecord.setLocationByPlatform(true);

@@ -19,7 +19,7 @@ public class City
 
 	public void repaint()
 	{
-		parent.repaint(this);
+		if (parent != null) parent.repaint(this);
 	}
 
 }

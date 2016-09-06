@@ -61,6 +61,16 @@ public class TableCityRecord extends JTable
 		repaint(city);
 	}
 
+	public void reset()
+	{
+		cities.forEach(c -> c.parent = null);
+		cities.clear();
+
+		while (tableModel.getRowCount() > 0) {
+			tableModel.removeRow(0);
+		}
+	}
+
 	public void repaint(City city)
 	{
 		int r = city.rowIndex;
