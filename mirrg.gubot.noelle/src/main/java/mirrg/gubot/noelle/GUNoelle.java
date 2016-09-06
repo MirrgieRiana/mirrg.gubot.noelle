@@ -337,7 +337,7 @@ public class GUNoelle
 									new JLabel("最大反復回数："),
 									createBorderPanelRight(
 										get(() -> {
-											spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 200, 10));
+											spinnerSkipLimitMax = new JSpinner(new SpinnerNumberModel(20, 0, 1000, 10));
 											spinnerSkipLimitMax.setAlignmentX(0.5f);
 											((JSpinner.DefaultEditor) spinnerSkipLimitMax.getEditor()).getTextField().setHorizontalAlignment(SwingConstants.CENTER);
 											return spinnerSkipLimitMax;
