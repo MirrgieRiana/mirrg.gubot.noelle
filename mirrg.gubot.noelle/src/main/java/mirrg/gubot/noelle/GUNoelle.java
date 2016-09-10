@@ -38,6 +38,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -494,6 +495,21 @@ public class GUNoelle
 					labelCityRecordCount = new JLabel("" + 0),
 					createBorderPanelRight(
 						null,
+						get(() -> {
+							return createButton("表示", e -> {
+								JDialog dialog = new JDialog(dialogCityRecord, "CSV");
+								dialog.setLayout(new CardLayout());
+								dialog.add(get(() -> {
+									JTextPane textPane = new JTextPane();
+									textPane.setText(tableCityRecord.getCSVData());
+									return createScrollPane(textPane, 600, 600);
+								}));
+								dialog.pack();
+								dialog.setLocationByPlatform(true);
+								dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+								dialog.setVisible(true);
+							});
+						}),
 						get(() -> {
 							JFileChooser fileChooser = new JFileChooser(new File("."));
 							return createButton("エクスポート", e -> {

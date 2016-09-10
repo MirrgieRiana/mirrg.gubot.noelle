@@ -30,7 +30,7 @@ public class TableCityRecord extends JTable
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -2381871167541831774L;
 	protected DefaultTableModel tableModel;
@@ -117,9 +117,16 @@ public class TableCityRecord extends JTable
 			HLog.processException(e);
 			return;
 		}
-		out.println("Date,Time,Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana");
+		out.print(getCSVData());
+		out.close();
+	}
+
+	public String getCSVData()
+	{
+		StringBuffer sb = new StringBuffer();
+		sb.append("Date,Time,Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana\n");
 		cities.forEach(c -> {
-			out.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+			sb.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
 				c.time.toLocalDate(),
 				c.time.toLocalTime(),
 				c.heroine.name,
@@ -131,7 +138,7 @@ public class TableCityRecord extends JTable
 				c.gold,
 				c.mana));
 		});
-		out.close();
+		return sb.toString();
 	}
 
 	public static Tuple4<Integer, Integer, Optional<Double>, Optional<Integer>> parseExperience(BufferedImage image, int x, int y)
