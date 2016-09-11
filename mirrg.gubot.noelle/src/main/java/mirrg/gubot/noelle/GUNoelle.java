@@ -712,9 +712,8 @@ public class GUNoelle
 							boolean newPhase = !heroine.get().name.equals("黒");
 
 							if (!phase && newPhase) {
-								city = new City();
+								city = new City(LocalDateTime.now());
 								city.heroine = heroine.get();
-								city.time = LocalDateTime.now();
 								tableCityRecord.add(city);
 								labelCityRecordCount.setText("" + tableCityRecord.getRowCount());
 							}

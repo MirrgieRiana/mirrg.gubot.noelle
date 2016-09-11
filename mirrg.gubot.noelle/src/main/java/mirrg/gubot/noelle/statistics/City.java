@@ -10,16 +10,22 @@ public class City
 	protected TableCityRecord parent;
 	protected int rowIndex;
 
-	public Heroine heroine;
 	public LocalDateTime time;
 
-	public int captainExperience;
-	public int heroineExperience;
-	public double baseExperience;
-	public double experienceRatio;
-	public int stoneBonus;
-	public int gold;
-	public int mana;
+	public Heroine heroine;
+
+	public Integer captainExperience;
+	public Integer heroineExperience;
+	public Double baseExperience;
+	public Double experienceRatio;
+	public Integer stoneBonus;
+	public Integer gold;
+	public Integer mana;
+
+	public City(LocalDateTime time)
+	{
+		this.time = time;
+	}
 
 	public void repaint()
 	{
