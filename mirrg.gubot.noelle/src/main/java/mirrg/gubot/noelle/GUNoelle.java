@@ -387,6 +387,7 @@ public class GUNoelle
 										createButton("削除", e -> {
 											listPluginSearch.getSelectedValuesList().stream()
 												.forEach(s -> {
+													s.get().onDeleted();
 													listModelPluginSearch.removeElement(s);
 												});
 										}),

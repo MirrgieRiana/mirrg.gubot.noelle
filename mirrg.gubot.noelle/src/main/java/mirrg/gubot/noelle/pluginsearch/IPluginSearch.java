@@ -22,4 +22,14 @@ public interface IPluginSearch
 
 	}
 
+	public default void closeDialog()
+	{
+
+	}
+
+	public default void onDeleted()
+	{
+		closeDialog();
+	}
+
 }

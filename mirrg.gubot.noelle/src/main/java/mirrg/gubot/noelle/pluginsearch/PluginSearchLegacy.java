@@ -7,23 +7,29 @@ import mirrg.gubot.noelle.GUNoelle;
 public class PluginSearchLegacy extends PluginSearchGroup implements IPluginSearchVisible
 {
 
-	private DialogPluginLegacy dialogPluginLegacy;
+	private DialogPluginLegacy dialog;
 
 	public PluginSearchLegacy(GUNoelle guNoelle)
 	{
-		dialogPluginLegacy = new DialogPluginLegacy();
-		dialogPluginLegacy.pack();
-		dialogPluginLegacy.setLocationByPlatform(true);
-		dialogPluginLegacy.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		dialog = new DialogPluginLegacy();
+		dialog.pack();
+		dialog.setLocationByPlatform(true);
+		dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
-		add(new PluginSearchExperiencePoints(guNoelle, dialogPluginLegacy));
-		add(new PluginSearchHeroine(guNoelle, dialogPluginLegacy));
+		add(new PluginSearchExperiencePoints(guNoelle, dialog));
+		add(new PluginSearchHeroine(guNoelle, dialog));
 	}
 
 	@Override
 	public void openDialog()
 	{
-		dialogPluginLegacy.setVisible(true);
+		dialog.setVisible(true);
+	}
+
+	@Override
+	public void closeDialog()
+	{
+		dialog.dispose();
 	}
 
 	@Override
