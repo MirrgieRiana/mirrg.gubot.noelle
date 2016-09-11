@@ -98,7 +98,7 @@ public class GUNoelle
 	protected int height;
 	protected int width;
 
-	protected JFrame frameMain;
+	public JFrame frameMain;
 	protected JCheckBox checkBoxRunning;
 	protected JList<String> listBlackPixels;
 	protected JLabel labelGUFound;
