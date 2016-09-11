@@ -1,8 +1,12 @@
 package mirrg.gubot.noelle.pluginsearch;
 
+import static mirrg.helium.swing.nitrogen.util.HSwing.*;
+
 import java.awt.CardLayout;
+import java.io.IOException;
 
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.WindowConstants;
 
 import mirrg.gubot.noelle.GUNoelle;
@@ -13,6 +17,7 @@ import mirrg.gubot.noelle.script.VMNoelle;
 import mirrg.helium.compile.oxygen.parser.core.Node;
 import mirrg.helium.compile.oxygen.util.PanelSyntax;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
+import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class PluginSearchScript implements IPluginSearchVisible
 {
@@ -30,7 +35,18 @@ public class PluginSearchScript implements IPluginSearchVisible
 		dialog = new JDialog(guNoelle.frameMain, "闇のスクリプト");
 		{
 			dialog.setLayout(new CardLayout());
-			dialog.add(panelSyntax = new PanelSyntax(ScriptNoelle.getParser(), ScriptNoelle.sampleSrc));
+			dialog.add(createSplitPaneVertical(
+				createScrollPane(get(() -> {
+					JEditorPane textPane = new JEditorPane();
+					textPane.setEditable(false);
+					try {
+						textPane.setPage(getClass().getResource("help.html"));
+					} catch (IOException e) {
+						HLog.processException(e);
+					}
+					return textPane;
+				}), 200, 100),
+				panelSyntax = new PanelSyntax(ScriptNoelle.getParser(), ScriptNoelle.sampleSrc)));
 
 			dialog.pack();
 			dialog.setLocationByPlatform(true);
