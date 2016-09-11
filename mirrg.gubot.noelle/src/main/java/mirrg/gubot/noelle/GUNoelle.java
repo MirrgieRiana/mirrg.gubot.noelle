@@ -56,6 +56,7 @@ import mirrg.gubot.noelle.pluginsearch.PluginSearchGUScreen;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchGroup;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchIconified;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchLegacy;
+import mirrg.gubot.noelle.pluginsearch.PluginSearchWaitExp;
 import mirrg.gubot.noelle.pluginsearch.RegistryPluginSearch;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
@@ -376,6 +377,7 @@ public class GUNoelle
 										listModelPluginSearch = new DefaultListModel<>();
 										listPluginSearch = new JList<>(listModelPluginSearch);
 
+										addPlugin(new PluginSearchWaitExp(this));
 										addPlugin(new PluginSearchIconified(this));
 										addPlugin(new PluginSearchGUScreen(this));
 										addPlugin(new PluginSearchCursor(this));
