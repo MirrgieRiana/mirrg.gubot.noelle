@@ -6,7 +6,7 @@ import java.util.function.Function;
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-public class RegisterPluginSearch
+public class RegistryPluginSearch
 {
 
 	public static ArrayList<Tuple<Function<GUNoelle, IPluginSearchVisible>, String>> factories = new ArrayList<>();

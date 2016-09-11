@@ -62,7 +62,7 @@ import mirrg.gubot.noelle.pluginsearch.PluginSearchGUScreen;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchGroup;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchIconified;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchLegacy;
-import mirrg.gubot.noelle.pluginsearch.RegisterPluginSearch;
+import mirrg.gubot.noelle.pluginsearch.RegistryPluginSearch;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
@@ -398,7 +398,7 @@ public class GUNoelle
 										get(() -> {
 											JMenuBar menuBar = new JMenuBar();
 											menuBar.add(process(new JMenu("追加..."), m -> {
-												RegisterPluginSearch.factories.forEach(f -> {
+												RegistryPluginSearch.factories.forEach(f -> {
 													m.add(HSwing.addActionListener(new JMenuItem(f.getY()), e2 -> {
 														addPlugin(f.getX().apply(this));
 													}));
