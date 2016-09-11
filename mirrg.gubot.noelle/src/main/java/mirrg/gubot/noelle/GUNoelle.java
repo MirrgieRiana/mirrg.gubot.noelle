@@ -19,15 +19,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
@@ -71,6 +65,7 @@ import mirrg.gubot.noelle.statistics.City;
 import mirrg.gubot.noelle.statistics.TableCityRecord;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple4;
+import mirrg.helium.standard.hydrogen.util.HLambda;
 import mirrg.helium.swing.nitrogen.util.HSwing;
 import mirrg.helium.swing.nitrogen.util.NamedSlot;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.FrameLog;
@@ -527,7 +522,7 @@ public class GUNoelle
 			if (guScreen.isPresent()) guScreen.get().mouseOn();
 
 			PluginSearchGroup plugins = new PluginSearchGroup();
-			toStream(listModelPluginSearch.elements())
+			HLambda.toStream(listModelPluginSearch.elements())
 				.map(NamedSlot::get)
 				.forEach(plugins::add);
 
@@ -974,29 +969,6 @@ public class GUNoelle
 	{
 		Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
 		return createScreenCapture(0, 0, size.width, size.height);
-	}
-
-	// TODO mirrg
-	public static <T> Stream<T> toStream(Enumeration<T> e)
-	{
-		return StreamSupport.stream(
-			Spliterators.spliteratorUnknownSize(
-				new Iterator<T>() {
-
-					@Override
-					public T next()
-					{
-						return e.nextElement();
-					}
-
-					@Override
-					public boolean hasNext()
-					{
-						return e.hasMoreElements();
-					}
-
-				},
-				Spliterator.ORDERED), false);
 	}
 
 }

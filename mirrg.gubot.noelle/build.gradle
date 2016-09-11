@@ -14,7 +14,7 @@ project.archivesBaseName = 'mirrg.gubot.noelle'
 
 // ★成果物のバージョン
 def superversion = '0' // 破壊的なバージョン変更
-def subversion = '0.6' // 破壊的でないバージョン変更
+def subversion = '0.7' // 破壊的でないバージョン変更
 
 // ★依存関係
 dependencies {
@@ -25,8 +25,10 @@ dependencies {
 	//compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
 	//compile group: 'mirrg', name: 'mirrg.struct.hydrogen-1.0', version: '+'
 	compile 'mirrg:mirrg.helium.standard.hydrogen.struct:+'
+	compile 'mirrg:mirrg.helium.standard.hydrogen.util:0.0.2'
 	compile 'mirrg:mirrg.helium.swing.nitrogen.util:+'
 	compile 'mirrg:mirrg.helium.swing.nitrogen.wrapper:+'
+	compile 'mirrg:mirrg.helium.compile.oxygen.parser:0.0.7'
 
 	// https://mvnrepository.com/artifact/com.googlecode.soundlibs/basicplayer
 	compile group: 'com.googlecode.soundlibs', name: 'basicplayer', version: '3.0.0.0'
@@ -40,6 +42,7 @@ def mavenRepositories = [
 	//'http://hg.pf.osdn.jp/view/t/ta/tacticsrealize/mirrg.struct.hydrogen/raw-file/tip/maven',
 	'https://raw.githubusercontent.com/MirrgieRiana/mirrg.helium.standard/master/maven',
 	'https://raw.githubusercontent.com/MirrgieRiana/mirrg.helium.swing/master/maven',
+	'https://raw.githubusercontent.com/MirrgieRiana/mirrg.helium.compile/master/maven',
 
 ]
 
