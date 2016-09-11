@@ -62,6 +62,7 @@ import mirrg.gubot.noelle.pluginsearch.PluginSearchGUScreen;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchGroup;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchIconified;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchLegacy;
+import mirrg.gubot.noelle.pluginsearch.RegisterPluginSearch;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
@@ -70,6 +71,7 @@ import mirrg.gubot.noelle.statistics.City;
 import mirrg.gubot.noelle.statistics.TableCityRecord;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple4;
+import mirrg.helium.swing.nitrogen.util.HSwing;
 import mirrg.helium.swing.nitrogen.util.NamedSlot;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.FrameLog;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
@@ -386,13 +388,31 @@ public class GUNoelle
 
 										return listPluginSearch;
 									}), 300, 150),
-									createBorderPanelRight(
-										null,
-										createButton("設定", e -> {
+									createBorderPanelLeft(
+										createButton("削除", e -> {
 											listPluginSearch.getSelectedValuesList().stream()
-												.map(NamedSlot::get)
-												.forEach(IPluginSearch::openDialog);
-										}))))),
+												.forEach(s -> {
+													listModelPluginSearch.removeElement(s);
+												});
+										}),
+										get(() -> {
+											JMenuBar menuBar = new JMenuBar();
+											menuBar.add(process(new JMenu("追加..."), m -> {
+												RegisterPluginSearch.factories.forEach(f -> {
+													m.add(HSwing.addActionListener(new JMenuItem(f.getY()), e2 -> {
+														addPlugin(f.getX().apply(this));
+													}));
+												});
+											}));
+											return menuBar;
+										}),
+										createBorderPanelRight(
+											null,
+											createButton("設定", e -> {
+												listPluginSearch.getSelectedValuesList().stream()
+													.map(NamedSlot::get)
+													.forEach(IPluginSearch::openDialog);
+											})))))),
 							c -> {
 								((JComponent) c).setBorder(new BevelBorder(BevelBorder.LOWERED));
 								((JComponent) c).setOpaque(true);
