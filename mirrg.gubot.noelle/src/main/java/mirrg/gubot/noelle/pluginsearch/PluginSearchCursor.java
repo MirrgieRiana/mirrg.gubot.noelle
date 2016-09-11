@@ -16,6 +16,8 @@ public class PluginSearchCursor implements IPluginSearchVisible
 	@Override
 	public Tuple<EnumPluginSearchCondition, String> tick(int milis)
 	{
+		if (!guNoelle.guScreen.isPresent()) return new Tuple<>(EnumPluginSearchCondition.STOP, "???");
+
 		if (!guNoelle.guScreen.get().getGameRegion().contains(guNoelle.guScreen.get().getMouseLocation())) {
 			return new Tuple<>(EnumPluginSearchCondition.STOP, "カーソルが外れました。");
 		} else {

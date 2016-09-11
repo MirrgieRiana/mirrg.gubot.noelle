@@ -18,6 +18,8 @@ public class PluginSearchExperiencePoints implements IPluginSearch
 	@Override
 	public Tuple<EnumPluginSearchCondition, String> tick(int milis)
 	{
+		if (!guNoelle.guScreen.isPresent()) return new Tuple<>(EnumPluginSearchCondition.STOP, "???");
+
 		if (dialog.checkBoxExperienceTrap.isSelected()) {
 			if (guNoelle.resultExperimentPoints != null) {
 
