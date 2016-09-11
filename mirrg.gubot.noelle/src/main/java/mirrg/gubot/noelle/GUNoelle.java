@@ -379,10 +379,10 @@ public class GUNoelle
 										listModelPluginSearch = new DefaultListModel<>();
 										listPluginSearch = new JList<>(listModelPluginSearch);
 
-										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchIconified(this), IPluginSearchVisible::getDescription));
-										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchGUScreen(this), IPluginSearchVisible::getDescription));
-										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchCursor(this), IPluginSearchVisible::getDescription));
-										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchLegacy(this), IPluginSearchVisible::getDescription));
+										addPlugin(new PluginSearchIconified(this));
+										addPlugin(new PluginSearchGUScreen(this));
+										addPlugin(new PluginSearchCursor(this));
+										addPlugin(new PluginSearchLegacy(this));
 
 										return listPluginSearch;
 									}), 300, 150),
@@ -477,6 +477,11 @@ public class GUNoelle
 
 		initThreadUpdateEvent();
 		start();
+	}
+
+	protected void addPlugin(IPluginSearchVisible plugin)
+	{
+		listModelPluginSearch.addElement(new NamedSlot<>(plugin, IPluginSearchVisible::getDescription));
 	}
 
 	protected void setStatusBar(String text)
