@@ -395,7 +395,9 @@ public class GUNoelle
 											menuBar.add(process(new JMenu("追加..."), m -> {
 												RegistryPluginSearch.factories.forEach(f -> {
 													m.add(HSwing.addActionListener(new JMenuItem(f.getY()), e2 -> {
-														addPlugin(f.getX().apply(this));
+														IPluginSearchVisible plugin = f.getX().apply(this);
+														addPlugin(plugin);
+														plugin.openDialog();
 													}));
 												});
 											}));
