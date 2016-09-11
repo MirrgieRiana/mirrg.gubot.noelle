@@ -3,10 +3,7 @@ package mirrg.gubot.noelle.pluginsearch;
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-/**
- * GUを見失ったら終わる
- */
-public class PluginSearchGUScreen implements IPluginSearch
+public class PluginSearchGUScreen implements IPluginSearchVisible
 {
 
 	private GUNoelle guNoelle;
@@ -24,6 +21,12 @@ public class PluginSearchGUScreen implements IPluginSearch
 		} else {
 			return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
 		}
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return "GUScreen - ゲーム画面を見失ったときに終了します。";
 	}
 
 }

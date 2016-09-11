@@ -4,7 +4,7 @@ import javax.swing.WindowConstants;
 
 import mirrg.gubot.noelle.GUNoelle;
 
-public class PluginSearchLegacy extends PluginSearchGroup
+public class PluginSearchLegacy extends PluginSearchGroup implements IPluginSearchVisible
 {
 
 	private DialogPluginLegacy dialogPluginLegacy;
@@ -24,6 +24,12 @@ public class PluginSearchLegacy extends PluginSearchGroup
 	public void openDialog()
 	{
 		dialogPluginLegacy.setVisible(true);
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return "Legacy - 旧式の検索フィルターです。";
 	}
 
 }

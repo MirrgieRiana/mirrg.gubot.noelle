@@ -3,10 +3,7 @@ package mirrg.gubot.noelle.pluginsearch;
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-/**
- * Noelle最小化時に終わる
- */
-public class PluginSearchIconified implements IPluginSearch
+public class PluginSearchIconified implements IPluginSearchVisible
 {
 
 	private GUNoelle guNoelle;
@@ -24,6 +21,12 @@ public class PluginSearchIconified implements IPluginSearch
 		} else {
 			return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
 		}
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return "Iconified - ツールが最小化されたときに終了します。";
 	}
 
 }

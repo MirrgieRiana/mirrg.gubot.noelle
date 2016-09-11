@@ -56,6 +56,7 @@ import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import mirrg.gubot.noelle.pluginsearch.EnumPluginSearchCondition;
 import mirrg.gubot.noelle.pluginsearch.IPluginSearch;
+import mirrg.gubot.noelle.pluginsearch.IPluginSearchVisible;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchCursor;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchGUScreen;
 import mirrg.gubot.noelle.pluginsearch.PluginSearchGroup;
@@ -69,6 +70,7 @@ import mirrg.gubot.noelle.statistics.City;
 import mirrg.gubot.noelle.statistics.TableCityRecord;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.standard.hydrogen.struct.Tuple4;
+import mirrg.helium.swing.nitrogen.util.NamedSlot;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.FrameLog;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
@@ -114,8 +116,8 @@ public class GUNoelle
 	protected JLabel labelSkipLimit;
 	protected JLabel labelSearching;
 	protected JCheckBox checkBoxSound;
-	protected DefaultListModel<IPluginSearch> listModelPluginSearch;
-	protected JList<IPluginSearch> listPluginSearch;
+	protected DefaultListModel<NamedSlot<IPluginSearchVisible>> listModelPluginSearch;
+	protected JList<NamedSlot<IPluginSearchVisible>> listPluginSearch;
 	protected JLabel labelStatusBar;
 
 	protected JDialog dialogScreen;
@@ -377,10 +379,10 @@ public class GUNoelle
 										listModelPluginSearch = new DefaultListModel<>();
 										listPluginSearch = new JList<>(listModelPluginSearch);
 
-										listModelPluginSearch.addElement(new PluginSearchIconified(this));
-										listModelPluginSearch.addElement(new PluginSearchGUScreen(this));
-										listModelPluginSearch.addElement(new PluginSearchCursor(this));
-										listModelPluginSearch.addElement(new PluginSearchLegacy(this));
+										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchIconified(this), IPluginSearchVisible::getDescription));
+										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchGUScreen(this), IPluginSearchVisible::getDescription));
+										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchCursor(this), IPluginSearchVisible::getDescription));
+										listModelPluginSearch.addElement(new NamedSlot<>(new PluginSearchLegacy(this), IPluginSearchVisible::getDescription));
 
 										return listPluginSearch;
 									}), 300, 150),
@@ -388,6 +390,7 @@ public class GUNoelle
 										null,
 										createButton("設定", e -> {
 											listPluginSearch.getSelectedValuesList().stream()
+												.map(NamedSlot::get)
 												.forEach(IPluginSearch::openDialog);
 										}))))),
 							c -> {
@@ -499,7 +502,9 @@ public class GUNoelle
 			if (guScreen.isPresent()) guScreen.get().mouseOn();
 
 			PluginSearchGroup plugins = new PluginSearchGroup();
-			toStream(listModelPluginSearch.elements()).forEach(plugins::add);
+			toStream(listModelPluginSearch.elements())
+				.map(NamedSlot::get)
+				.forEach(plugins::add);
 
 			plugins.onStarted();
 
