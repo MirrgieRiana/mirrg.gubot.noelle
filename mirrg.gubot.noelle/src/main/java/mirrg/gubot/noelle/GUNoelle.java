@@ -19,12 +19,18 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.imageio.ImageIO;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -48,6 +54,13 @@ import javax.swing.border.BevelBorder;
 
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
+import mirrg.gubot.noelle.pluginsearch.EnumPluginSearchCondition;
+import mirrg.gubot.noelle.pluginsearch.IPluginSearch;
+import mirrg.gubot.noelle.pluginsearch.PluginSearchCursor;
+import mirrg.gubot.noelle.pluginsearch.PluginSearchGUScreen;
+import mirrg.gubot.noelle.pluginsearch.PluginSearchGroup;
+import mirrg.gubot.noelle.pluginsearch.PluginSearchIconified;
+import mirrg.gubot.noelle.pluginsearch.PluginSearchLegacy;
 import mirrg.gubot.noelle.screen.FactoryGUScreen;
 import mirrg.gubot.noelle.screen.FactoryGUScreen.ResponseFind;
 import mirrg.gubot.noelle.screen.GUScreen;
@@ -96,23 +109,14 @@ public class GUNoelle
 	protected JLabel labelFaceParameters;
 	protected JTextField textFieldNameHeroine;
 	protected JLabel labelExperimentPoints;
-	protected Tuple4<Integer, Integer, Double, Integer> resultExperimentPoints;
+	public Tuple4<Integer, Integer, Double, Integer> resultExperimentPoints;
 	protected JSpinner spinnerSkipLimitMax;
 	protected JLabel labelSkipLimit;
 	protected JLabel labelSearching;
 	protected JCheckBox checkBoxSound;
-	protected JCheckBox checkBoxUnknownHeroine;
-	protected JCheckBox checkBoxExperienceTrap;
-	protected JSpinner spinnerExperienceMax;
-	protected JSpinner spinnerExperienceMin;
-	protected JSpinner spinnerExperienceRatioMin;
-	protected JSpinner spinnerStoneBonusMin;
-	protected JLabel faceLabelSelected;
-	protected JList<String> listHeroines;
-	protected JList<String> listButtleClass;
+	protected DefaultListModel<IPluginSearch> listModelPluginSearch;
+	protected JList<IPluginSearch> listPluginSearch;
 	protected JLabel labelStatusBar;
-
-	protected boolean isIconified;
 
 	protected JDialog dialogScreen;
 	protected JLabel labelGUScreen;
@@ -121,13 +125,14 @@ public class GUNoelle
 	protected TableCityRecord tableCityRecord;
 	protected JLabel labelCityRecordCount;
 
-	protected volatile Optional<GUScreen> guScreen = Optional.empty();
-	protected volatile long lastSelecting;
-	protected volatile boolean isSelecting;
-	protected volatile Optional<Heroine> heroine;
-	protected volatile boolean known;
-	protected volatile boolean phase = false;
-	protected volatile City city;
+	public boolean isIconified;
+	public volatile Optional<GUScreen> guScreen = Optional.empty();
+	public volatile long lastSelecting;
+	public volatile boolean isSelecting;
+	public volatile Optional<Heroine> heroine;
+	public volatile boolean known;
+	public volatile boolean phase = false;
+	public volatile City city;
 
 	public GUNoelle(int height, int width)
 	{
@@ -367,86 +372,24 @@ public class GUNoelle
 									createBorderPanelRight(
 										null,
 										createButton("試聴", e -> playSound()))),
-								createBorderPanelLeft(
-									get(() -> {
-										checkBoxUnknownHeroine = new JCheckBox("未知ヒロインで停止");
-										checkBoxUnknownHeroine.setSelected(true);
-										return checkBoxUnknownHeroine;
-									}),
-									null),
-								createBorderPanelLeft(
-									get(() -> {
-										checkBoxExperienceTrap = new JCheckBox("経験値捕獲を有効にする");
-										return checkBoxExperienceTrap;
-									}),
-									null),
-								createBorderPanelLeft(
-									new JLabel("　　領主経験値："),
+								createBorderPanelDown(
+									createScrollPane(get(() -> {
+										listModelPluginSearch = new DefaultListModel<>();
+										listPluginSearch = new JList<>(listModelPluginSearch);
+
+										listModelPluginSearch.addElement(new PluginSearchIconified(this));
+										listModelPluginSearch.addElement(new PluginSearchGUScreen(this));
+										listModelPluginSearch.addElement(new PluginSearchCursor(this));
+										listModelPluginSearch.addElement(new PluginSearchLegacy(this));
+
+										return listPluginSearch;
+									}), 300, 150),
 									createBorderPanelRight(
 										null,
-										get(() -> {
-											spinnerExperienceMin = new JSpinner(new SpinnerNumberModel(10000, 0, 10000, 100));
-											((JSpinner.DefaultEditor) spinnerExperienceMin.getEditor()).getTextField().setColumns(6);
-											return spinnerExperienceMin;
-										}),
-										new JLabel("～"),
-										get(() -> {
-											spinnerExperienceMax = new JSpinner(new SpinnerNumberModel(10000, 0, 10000, 100));
-											((JSpinner.DefaultEditor) spinnerExperienceMax.getEditor()).getTextField().setColumns(6);
-											return spinnerExperienceMax;
-										}))),
-								createBorderPanelLeft(
-									new JLabel("　　最小経験値倍率："),
-									createBorderPanelRight(
-										null,
-										get(() -> {
-											spinnerExperienceRatioMin = new JSpinner(new SpinnerNumberModel(5.0, 1.0, 5.0, 0.2));
-											((JSpinner.DefaultEditor) spinnerExperienceRatioMin.getEditor()).getTextField().setColumns(2);
-											return spinnerExperienceRatioMin;
-										}))),
-								createBorderPanelLeft(
-									new JLabel("　　最小封印石ボーナス："),
-									createBorderPanelRight(
-										null,
-										get(() -> {
-											spinnerStoneBonusMin = new JSpinner(new SpinnerNumberModel(3, 0, 3, 1));
-											((JSpinner.DefaultEditor) spinnerStoneBonusMin.getEditor()).getTextField().setColumns(2);
-											return spinnerStoneBonusMin;
-										}))),
-								createSplitPaneHorizontal(
-									createBorderPanelUp(
-										createPanel(get(() -> {
-											faceLabelSelected = new FaceLabel();
-											return faceLabelSelected;
-										})),
-										get(() -> {
-											listHeroines = new JList<>();
-											refreshHeroines();
-											RegistryHeroine.addListener(h -> {
-												refreshHeroines();
-											});
-											listHeroines.addListSelectionListener(e -> {
-												String name = listHeroines.getSelectedValue();
-												if (name != null) {
-													if (name.equals("None")) {
-														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
-													} else {
-														faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
-													}
-												} else {
-													faceLabelSelected.setIcon(null);
-												}
-											});
-											return createScrollPane(listHeroines, 120, 200);
-										})),
-									get(() -> {
-										listButtleClass = new JList<>();
-										listButtleClass.setListData(Stream.concat(
-											Stream.of("None"),
-											Stream.of(RegistryHeroine.getBattleClasses()))
-											.toArray(String[]::new));
-										return createScrollPane(listButtleClass, 120, 300);
-									})))),
+										createButton("設定", e -> {
+											listPluginSearch.getSelectedValuesList().stream()
+												.forEach(IPluginSearch::openDialog);
+										}))))),
 							c -> {
 								((JComponent) c).setBorder(new BevelBorder(BevelBorder.LOWERED));
 								((JComponent) c).setOpaque(true);
@@ -542,181 +485,11 @@ public class GUNoelle
 			(int) (Math.random() * 128)));
 	}
 
-	/**
-	 * Noelle最小化時に終わる
-	 */
-	public class PluginSearchIconified implements IPluginSearch
-	{
-
-		@Override
-		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
-		{
-			if (isIconified) {
-				return new Tuple<>(EnumPluginSearchCondition.STOP, "ツール画面が最小化されました。");
-			} else {
-				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-			}
-		}
-
-	}
-
-	/**
-	 * GUを見失ったら終わる
-	 */
-	public class PluginSearchGUScreen implements IPluginSearch
-	{
-
-		@Override
-		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
-		{
-			if (!guScreen.isPresent()) {
-				return new Tuple<>(EnumPluginSearchCondition.STOP, "スクリーンを認識できません。");
-			} else {
-				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-			}
-		}
-
-	}
-
-	/**
-	 * カーソルがGU画面から外れたら終わる
-	 */
-	public class PluginSearchCursor implements IPluginSearch
-	{
-
-		@Override
-		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
-		{
-			if (!guScreen.get().getGameRegion().contains(guScreen.get().getMouseLocation())) {
-				return new Tuple<>(EnumPluginSearchCondition.STOP, "カーソルが外れました。");
-			} else {
-				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-			}
-		}
-
-	}
-
-	public class PluginSearchHeroine implements IPluginSearch
-	{
-
-		private int time = 0;
-
-		@Override
-		public void onSkipped()
-		{
-			time = 0;
-		}
-
-		@Override
-		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
-		{
-
-			if (known) {
-				if (heroine.get().name.equals("黒")) { // 黒背景
-
-					time = milis;
-					return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
-
-				} else { // 既知ヒロインが居た
-
-					// キャッチヒロインに指定されている場合終了
-					if (listHeroines.getSelectedValuesList().stream()
-						.map(o -> o)
-						.filter(b -> b.equals(heroine.get().name))
-						.findAny()
-						.isPresent()) {
-						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定のヒロインです。");
-					}
-
-					// キャッチクラスに指定されている場合終了
-					if (listButtleClass.getSelectedValuesList().stream()
-						.map(o -> o)
-						.filter(b -> b.equals(heroine.get().getButtleClass()))
-						.findAny()
-						.isPresent()) {
-						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定のクラスのヒロインです。");
-					}
-
-					// 飛ばしてよい
-					return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-
-				}
-			}
-
-			// 0.5秒経過
-			if (milis - time > 500) {
-				if (isSelecting) {
-
-					// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
-					if (checkBoxUnknownHeroine.isSelected()) {
-						return new Tuple<>(EnumPluginSearchCondition.STOP, "未知のヒロインです。");
-					} else {
-						return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-					}
-
-				} else {
-
-					// 非選択中
-					return new Tuple<>(EnumPluginSearchCondition.STOP, "領地選択画面から離れました。");
-
-				}
-			}
-
-			return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
-		}
-
-	}
-
-	public class PluginSearchExperiencePoints implements IPluginSearch
-	{
-
-		@Override
-		public Tuple<EnumPluginSearchCondition, String> tick(int milis)
-		{
-			if (checkBoxExperienceTrap.isSelected()) {
-				if (resultExperimentPoints != null) {
-
-					int max = (Integer) spinnerExperienceMax.getModel().getValue();
-					int min = (Integer) spinnerExperienceMin.getModel().getValue();
-					if (min <= resultExperimentPoints.getX() && resultExperimentPoints.getX() >= max) {
-						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の経験値です。");
-					}
-
-					double ratioMin = (Double) spinnerExperienceRatioMin.getModel().getValue();
-					if (ratioMin <= resultExperimentPoints.getZ()) {
-						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の倍率です。");
-					}
-
-					int stoneBonusMin = (Integer) spinnerStoneBonusMin.getModel().getValue();
-					if (stoneBonusMin <= resultExperimentPoints.getW()) {
-						return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の封印石ボーナスです。");
-					}
-
-					return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-				} else {
-					return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
-				}
-			} else {
-				return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);
-			}
-		}
-
-	}
-
 	private void startSearch()
 	{
 		Thread thread = new Thread(() -> {
 			int t = 0;
 			int skipLimit = (Integer) spinnerSkipLimitMax.getValue();
-
-			ArrayList<IPluginSearch> plugins = new ArrayList<>();
-			{
-				plugins.add(new PluginSearchIconified());
-				plugins.add(new PluginSearchGUScreen());
-				plugins.add(new PluginSearchCursor());
-				plugins.add(new PluginSearchHeroine());
-				plugins.add(new PluginSearchExperiencePoints());
-			}
 
 			SwingUtilities.invokeLater(() -> {
 				setStatusBar("");
@@ -724,6 +497,11 @@ public class GUNoelle
 			});
 
 			if (guScreen.isPresent()) guScreen.get().mouseOn();
+
+			PluginSearchGroup plugins = new PluginSearchGroup();
+			toStream(listModelPluginSearch.elements()).forEach(plugins::add);
+
+			plugins.onStarted();
 
 			try {
 				while (true) {
@@ -737,8 +515,8 @@ public class GUNoelle
 					t += 15;
 
 					boolean skippable = true;
-					for (IPluginSearch plugin : plugins) {
-						Tuple<EnumPluginSearchCondition, String> res = plugin.tick(t);
+					{
+						Tuple<EnumPluginSearchCondition, String> res = plugins.tick(t);
 
 						if (res.getX() == EnumPluginSearchCondition.STOP) {
 							SwingUtilities.invokeLater(() -> {
@@ -778,7 +556,7 @@ public class GUNoelle
 								return;
 							}
 
-							plugins.forEach(IPluginSearch::onSkipped);
+							plugins.onSkipped();
 						}
 
 						t = 0;
@@ -820,15 +598,6 @@ public class GUNoelle
 			HLog.processException(e1);
 		}
 		textFieldNameHeroine.setText("");
-	}
-
-	private void refreshHeroines()
-	{
-		listHeroines.setListData(Stream.concat(
-			Stream.of("None"),
-			RegistryHeroine.getHeroines()
-				.map(h2 -> h2.name))
-			.toArray(String[]::new));
 	}
 
 	public void show()
@@ -1175,6 +944,29 @@ public class GUNoelle
 	{
 		Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
 		return createScreenCapture(0, 0, size.width, size.height);
+	}
+
+	// TODO mirrg
+	public static <T> Stream<T> toStream(Enumeration<T> e)
+	{
+		return StreamSupport.stream(
+			Spliterators.spliteratorUnknownSize(
+				new Iterator<T>() {
+
+					@Override
+					public T next()
+					{
+						return e.nextElement();
+					}
+
+					@Override
+					public boolean hasNext()
+					{
+						return e.hasMoreElements();
+					}
+
+				},
+				Spliterator.ORDERED), false);
 	}
 
 }
