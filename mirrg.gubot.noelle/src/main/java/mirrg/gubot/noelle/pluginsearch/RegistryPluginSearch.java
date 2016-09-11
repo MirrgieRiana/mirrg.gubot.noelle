@@ -15,6 +15,7 @@ public class RegistryPluginSearch
 		factories.add(new Tuple<>(PluginSearchGUScreen::new, "GUScreen"));
 		factories.add(new Tuple<>(PluginSearchCursor::new, "Cursor"));
 		factories.add(new Tuple<>(PluginSearchLegacy::new, "Legacy"));
+		factories.add(new Tuple<>(PluginSearchScript::new, "Script"));
 		factories.add(new Tuple<>(PluginSearchWaitExp::new, "WaitExp"));
 	}
 
