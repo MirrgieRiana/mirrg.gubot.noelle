@@ -542,25 +542,6 @@ public class GUNoelle
 			(int) (Math.random() * 128)));
 	}
 
-	public static enum EnumPluginSearchCondition
-	{
-		SKIPPABLE,
-		STOP,
-		WAITING,
-	}
-
-	public static interface IPluginSearch
-	{
-
-		public Tuple<EnumPluginSearchCondition, String> tick(int milis);
-
-		public default void onSkipped()
-		{
-
-		}
-
-	}
-
 	/**
 	 * Noelle最小化時に終わる
 	 */
