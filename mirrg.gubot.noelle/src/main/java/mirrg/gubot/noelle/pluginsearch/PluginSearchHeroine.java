@@ -28,7 +28,7 @@ public class PluginSearchHeroine implements IPluginSearch
 	{
 		if (!guNoelle.guScreen.isPresent()) return new Tuple<>(EnumPluginSearchCondition.STOP, "???");
 
-		if (guNoelle.known) {
+		if (guNoelle.knownOrBlack) {
 			if (guNoelle.heroine.get().name.equals("黒")) { // 黒背景
 
 				time = milis;

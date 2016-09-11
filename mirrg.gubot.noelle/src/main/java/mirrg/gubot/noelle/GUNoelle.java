@@ -130,7 +130,7 @@ public class GUNoelle
 	public volatile long lastSelecting;
 	public volatile boolean isSelecting;
 	public volatile Optional<Heroine> heroine;
-	public volatile boolean known;
+	public volatile boolean knownOrBlack;
 	public volatile boolean phase = false;
 	public volatile City city;
 
@@ -707,8 +707,8 @@ public class GUNoelle
 
 						// このヒロインについて既知といえるか
 						double distance = heroine2.get().getY();
-						known = distance < 250;
-						if (known) {
+						knownOrBlack = distance < 250;
+						if (knownOrBlack) {
 							boolean newPhase = !heroine.get().name.equals("黒");
 
 							if (!phase && newPhase) {
@@ -729,12 +729,12 @@ public class GUNoelle
 							+ "</table></html>",
 							heroine.get().name,
 							distance,
-							known ? "既知" : "未知",
+							knownOrBlack ? "既知" : "未知",
 							heroine.get().getButtleClass()));
 
 					} else {
 						faceLabelGuessed.setIcon(null);
-						known = false;
+						knownOrBlack = false;
 						labelFaceParameters.setText("<html></html>");
 					}
 
@@ -788,7 +788,7 @@ public class GUNoelle
 				} else {
 					heroine = Optional.empty();
 					faceLabelGuessed.setIcon(null);
-					known = false;
+					knownOrBlack = false;
 					labelFaceParameters.setText("<html></html>");
 					resultExperimentPoints = null;
 					labelExperimentPoints.setText("<html></html>");
@@ -798,7 +798,7 @@ public class GUNoelle
 				faceLabelTrimed.setIcon(null);
 				heroine = Optional.empty();
 				faceLabelGuessed.setIcon(null);
-				known = false;
+				knownOrBlack = false;
 				labelFaceParameters.setText("<html></html>");
 				resultExperimentPoints = null;
 				labelExperimentPoints.setText("<html></html>");
