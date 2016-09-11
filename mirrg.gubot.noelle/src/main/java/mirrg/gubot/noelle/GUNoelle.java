@@ -1182,26 +1182,6 @@ public class GUNoelle
 		}
 	}
 
-	private static class ScreenLabel extends JLabel
-	{
-
-		/**
-		 *
-		 */
-		private static final long serialVersionUID = 2415051591221706988L;
-
-		public ScreenLabel(int width, int height)
-		{
-			setMaximumSize(new Dimension(width, height));
-			setMinimumSize(new Dimension(width, height));
-			setPreferredSize(new Dimension(width, height));
-
-			setBackground(new Color(32, 32, 32));
-			setOpaque(true);
-		}
-
-	}
-
 	/**
 	 * 小さい領域でも60Hzでしか呼び出せない。全画面を取得する場合30Hzに下がる。
 	 */
