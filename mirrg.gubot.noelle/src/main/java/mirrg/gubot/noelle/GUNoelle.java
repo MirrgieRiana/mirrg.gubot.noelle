@@ -418,7 +418,6 @@ public class GUNoelle
 													s.get().onDeleted();
 													listModelPluginSearch.removeElement(s);
 												});
-											savePlugins();
 										}),
 										get(() -> {
 											JMenuBar menuBar = new JMenuBar();
@@ -427,7 +426,6 @@ public class GUNoelle
 													m.add(HSwing.addActionListener(new JMenuItem(f.getY()), e2 -> {
 														IPluginSearchVisible plugin = f.getX().apply(this);
 														addPlugin(plugin);
-														savePlugins();
 														plugin.openDialog();
 													}));
 												});
@@ -440,6 +438,9 @@ public class GUNoelle
 												listPluginSearch.getSelectedValuesList().stream()
 													.map(NamedSlot::get)
 													.forEach(IPluginSearch::openDialog);
+											}),
+											createButton("再読込", e -> {
+												loadPlugins();
 											}),
 											createButton("保存", e -> {
 												savePlugins();
