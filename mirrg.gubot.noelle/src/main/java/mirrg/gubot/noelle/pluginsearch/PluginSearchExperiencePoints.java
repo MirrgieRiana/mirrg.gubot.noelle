@@ -1,27 +1,18 @@
 package mirrg.gubot.noelle.pluginsearch;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-public class PluginSearchExperiencePoints implements IPluginSearchLegacy
+public class PluginSearchExperiencePoints implements IPluginSearch
 {
 
 	private GUNoelle guNoelle;
-	@XStreamOmitField
-	private DialogPluginLegacy dialog;
+	private PluginSearchLegacy parent;
 
-	public PluginSearchExperiencePoints(GUNoelle guNoelle, DialogPluginLegacy dialog)
+	public PluginSearchExperiencePoints(GUNoelle guNoelle, PluginSearchLegacy parent)
 	{
 		this.guNoelle = guNoelle;
-		this.dialog = dialog;
-	}
-
-	@Override
-	public void setDialog(DialogPluginLegacy dialog)
-	{
-		this.dialog = dialog;
+		this.parent = parent;
 	}
 
 	@Override
@@ -29,21 +20,21 @@ public class PluginSearchExperiencePoints implements IPluginSearchLegacy
 	{
 		if (!guNoelle.guScreen.isPresent()) return new Tuple<>(EnumPluginSearchCondition.STOP, "???");
 
-		if (dialog.checkBoxExperienceTrap.isSelected()) {
+		if (parent.dialog.checkBoxExperienceTrap.isSelected()) {
 			if (guNoelle.resultExperimentPoints != null) {
 
-				int max = (Integer) dialog.spinnerExperienceMax.getModel().getValue();
-				int min = (Integer) dialog.spinnerExperienceMin.getModel().getValue();
+				int max = (Integer) parent.dialog.spinnerExperienceMax.getModel().getValue();
+				int min = (Integer) parent.dialog.spinnerExperienceMin.getModel().getValue();
 				if (min <= guNoelle.resultExperimentPoints.getX() && guNoelle.resultExperimentPoints.getX() >= max) {
 					return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の経験値です。");
 				}
 
-				double ratioMin = (Double) dialog.spinnerExperienceRatioMin.getModel().getValue();
+				double ratioMin = (Double) parent.dialog.spinnerExperienceRatioMin.getModel().getValue();
 				if (ratioMin <= guNoelle.resultExperimentPoints.getZ()) {
 					return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の倍率です。");
 				}
 
-				int stoneBonusMin = (Integer) dialog.spinnerStoneBonusMin.getModel().getValue();
+				int stoneBonusMin = (Integer) parent.dialog.spinnerStoneBonusMin.getModel().getValue();
 				if (stoneBonusMin <= guNoelle.resultExperimentPoints.getW()) {
 					return new Tuple<>(EnumPluginSearchCondition.STOP, "指定の封印石ボーナスです。");
 				}

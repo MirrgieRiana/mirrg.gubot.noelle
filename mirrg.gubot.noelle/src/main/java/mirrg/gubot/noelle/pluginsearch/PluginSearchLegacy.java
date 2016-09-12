@@ -8,18 +8,18 @@ import mirrg.gubot.noelle.GUNoelle;
 import mirrg.gubot.noelle.IConvertable;
 import mirrg.gubot.noelle.pluginsearch.DialogPluginLegacy.Data;
 
-public class PluginSearchLegacy extends PluginSearchGroup<IPluginSearchLegacy> implements IPluginSearchVisible, IConvertable
+public class PluginSearchLegacy extends PluginSearchGroup implements IPluginSearchVisible, IConvertable
 {
 
 	@XStreamOmitField
-	private DialogPluginLegacy dialog;
+	protected DialogPluginLegacy dialog;
 
 	public PluginSearchLegacy(GUNoelle guNoelle)
 	{
 		init2();
 
-		add(new PluginSearchExperiencePoints(guNoelle, dialog));
-		add(new PluginSearchHeroine(guNoelle, dialog));
+		add(new PluginSearchExperiencePoints(guNoelle, this));
+		add(new PluginSearchHeroine(guNoelle, this));
 	}
 
 	private void init2()
@@ -61,8 +61,6 @@ public class PluginSearchLegacy extends PluginSearchGroup<IPluginSearchLegacy> i
 	{
 		init2();
 		dialog.setData(data);
-
-		plugins.forEach(p -> p.setDialog(dialog));
 	}
 
 }

@@ -5,23 +5,16 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-public class PluginSearchHeroine implements IPluginSearchLegacy
+public class PluginSearchHeroine implements IPluginSearch
 {
 
 	private GUNoelle guNoelle;
-	@XStreamOmitField
-	private DialogPluginLegacy dialog;
+	private PluginSearchLegacy parent;
 
-	public PluginSearchHeroine(GUNoelle guNoelle, DialogPluginLegacy dialog)
+	public PluginSearchHeroine(GUNoelle guNoelle, PluginSearchLegacy parent)
 	{
 		this.guNoelle = guNoelle;
-		this.dialog = dialog;
-	}
-
-	@Override
-	public void setDialog(DialogPluginLegacy dialog)
-	{
-		this.dialog = dialog;
+		this.parent = parent;
 	}
 
 	@XStreamOmitField
@@ -47,7 +40,7 @@ public class PluginSearchHeroine implements IPluginSearchLegacy
 			} else { // 既知ヒロインが居た
 
 				// キャッチヒロインに指定されている場合終了
-				if (dialog.listHeroines.getSelectedValuesList().stream()
+				if (parent.dialog.listHeroines.getSelectedValuesList().stream()
 					.map(o -> o)
 					.filter(b -> b.equals(guNoelle.heroine.get().name))
 					.findAny()
@@ -56,7 +49,7 @@ public class PluginSearchHeroine implements IPluginSearchLegacy
 				}
 
 				// キャッチクラスに指定されている場合終了
-				if (dialog.listButtleClass.getSelectedValuesList().stream()
+				if (parent.dialog.listButtleClass.getSelectedValuesList().stream()
 					.map(o -> o)
 					.filter(b -> b.equals(guNoelle.heroine.get().getButtleClass()))
 					.findAny()
@@ -75,7 +68,7 @@ public class PluginSearchHeroine implements IPluginSearchLegacy
 			if (guNoelle.isSelecting) {
 
 				// 選択中（飛ばすべきものでも止めるべきものでもなく、黒背景でもない困った状態）
-				if (dialog.checkBoxUnknownHeroine.isSelected()) {
+				if (parent.dialog.checkBoxUnknownHeroine.isSelected()) {
 					return new Tuple<>(EnumPluginSearchCondition.STOP, "未知のヒロインです。");
 				} else {
 					return new Tuple<>(EnumPluginSearchCondition.SKIPPABLE, null);

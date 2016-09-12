@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-public class PluginSearchGroup<T extends IPluginSearch> implements IPluginSearch
+public class PluginSearchGroup implements IPluginSearch
 {
 
-	protected ArrayList<T> plugins = new ArrayList<>();
+	protected ArrayList<IPluginSearch> plugins = new ArrayList<>();
 
-	public void add(T plugin)
+	public void add(IPluginSearch plugin)
 	{
 		plugins.add(plugin);
 	}
@@ -18,7 +18,7 @@ public class PluginSearchGroup<T extends IPluginSearch> implements IPluginSearch
 	public Tuple<EnumPluginSearchCondition, String> tick(int milis)
 	{
 		boolean skippable = true;
-		for (T plugin : plugins) {
+		for (IPluginSearch plugin : plugins) {
 			Tuple<EnumPluginSearchCondition, String> res = plugin.tick(milis);
 
 			if (res.getX() == EnumPluginSearchCondition.STOP) return res;
