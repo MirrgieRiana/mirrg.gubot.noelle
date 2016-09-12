@@ -543,6 +543,7 @@ public class GUNoelle
 		RegistryPluginSearch.factories.forEach(t -> xStream.aliasType("plugin." + t.getZ(), t.getY()));
 		xStream.registerConverter(new Converter() {
 
+			@SuppressWarnings("rawtypes")
 			@Override
 			public boolean canConvert(Class type)
 			{
