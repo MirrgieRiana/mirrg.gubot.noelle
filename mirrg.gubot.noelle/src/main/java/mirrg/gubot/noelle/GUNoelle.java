@@ -423,7 +423,7 @@ public class GUNoelle
 											JMenuBar menuBar = new JMenuBar();
 											menuBar.add(process(new JMenu("追加..."), m -> {
 												RegistryPluginSearch.factories.forEach(f -> {
-													m.add(HSwing.addActionListener(new JMenuItem(f.getY()), e2 -> {
+													m.add(HSwing.addActionListener(new JMenuItem(f.getZ()), e2 -> {
 														IPluginSearchVisible plugin = f.getX().apply(this);
 														addPlugin(plugin);
 														plugin.openDialog();
