@@ -387,27 +387,7 @@ public class GUNoelle
 										listModelPluginSearch = new DefaultListModel<>();
 										listPluginSearch = new JList<>(listModelPluginSearch);
 
-										File file = getFilePlugins();
-										ArrayList<IPluginSearchVisible> object = null;
-										if (file.isFile()) {
-											try {
-												object = (ArrayList<IPluginSearchVisible>) getXStream().fromXML(new FileInputStream(file));
-											} catch (Exception e) {
-												HLog.processException(e);
-											}
-										}
-										if (object == null) {
-											object = new ArrayList<>();
-											object.add(new PluginSearchWaitExp(this));
-											object.add(new PluginSearchIconified(this));
-											object.add(new PluginSearchGUScreen(this));
-											object.add(new PluginSearchCursor(this));
-											object.add(new PluginSearchLegacy(this));
-											object.forEach(this::addPlugin);
-											savePlugins();
-										} else {
-											object.forEach(this::addPlugin);
-										}
+										loadPlugins();
 
 										return listPluginSearch;
 									}), 300, 150),
@@ -530,6 +510,32 @@ public class GUNoelle
 
 		initThreadUpdateEvent();
 		start();
+	}
+
+	private void loadPlugins()
+	{
+		File file = getFilePlugins();
+		ArrayList<IPluginSearchVisible> object = null;
+		if (file.isFile()) {
+			try {
+				object = (ArrayList<IPluginSearchVisible>) getXStream().fromXML(new FileInputStream(file));
+			} catch (Exception e) {
+				HLog.processException(e);
+			}
+		}
+		listModelPluginSearch.clear();
+		if (object == null) {
+			object = new ArrayList<>();
+			object.add(new PluginSearchWaitExp(this));
+			object.add(new PluginSearchIconified(this));
+			object.add(new PluginSearchGUScreen(this));
+			object.add(new PluginSearchCursor(this));
+			object.add(new PluginSearchLegacy(this));
+			object.forEach(this::addPlugin);
+			savePlugins();
+		} else {
+			object.forEach(this::addPlugin);
+		}
 	}
 
 	private File getFilePlugins()
