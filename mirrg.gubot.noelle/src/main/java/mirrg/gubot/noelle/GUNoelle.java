@@ -540,6 +540,7 @@ public class GUNoelle
 	{
 		XStream xStream = new XStream();
 		xStream.autodetectAnnotations(true);
+		RegistryPluginSearch.factories.forEach(t -> xStream.aliasType("plugin." + t.getZ(), t.getY()));
 		xStream.registerConverter(new Converter() {
 
 			@Override
