@@ -4,6 +4,7 @@ import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.CardLayout;
 import java.io.IOException;
+import java.util.stream.Stream;
 
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -26,6 +27,8 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 {
 
 	private GUNoelle guNoelle;
+	@XStreamOmitField
+	private VMNoelleImpl vm;
 	@XStreamOmitField
 	private JDialog dialog;
 	@XStreamOmitField
@@ -52,6 +55,8 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 
 	private void init2()
 	{
+		vm = new VMNoelleImpl();
+
 		dialog = new JDialog(guNoelle.frameMain, "闇のスクリプト");
 		{
 			dialog.setLayout(new CardLayout());
@@ -66,17 +71,17 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 					}
 					return textPane;
 				}), 200, 100),
-				panelSyntax = new PanelSyntax(ScriptNoelle.getParser(), src)));
+				panelSyntax = new PanelSyntax(ScriptNoelle.getParser(vm), src)));
 
 			dialog.pack();
 			dialog.setLocationByPlatform(true);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 
-		node = ScriptNoelle.getParser().parse(src);
+		node = ScriptNoelle.getParser(vm).parse(src);
 
 		panelSyntax.eventManager.register(String.class, s -> {
-			Node<IFormulaBoolean> node = ScriptNoelle.getParser().parse(s);
+			Node<IFormulaBoolean> node = ScriptNoelle.getParser(vm).parse(s);
 			if (node != null) {
 				this.node = node;
 				src = s;
@@ -93,65 +98,7 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 
 		boolean res;
 		try {
-			res = node.value.calculate(new VMNoelle() {
-
-				@Override
-				public Object getVariable(String name)
-				{
-					if (name.equals("heroine")) {
-						if (!guNoelle.knownOrBlack) throw waiting;
-						if (guNoelle.heroine.get().name.equals("黒")) throw waiting;
-						return guNoelle.heroine.get().name;
-					}
-					if (name.equals("class")) {
-						if (!guNoelle.knownOrBlack) throw waiting;
-						if (guNoelle.heroine.get().name.equals("黒")) throw waiting;
-						return RegistryHeroine.buttleClasses.get(guNoelle.heroine.get().name);
-					}
-					if (name.equals("captainExp")) {
-						if (guNoelle.resultExperimentPoints == null) throw waiting;
-						return (double) guNoelle.resultExperimentPoints.getX();
-					}
-					if (name.equals("heroineExp")) {
-						if (guNoelle.resultExperimentPoints == null) throw waiting;
-						return (double) guNoelle.resultExperimentPoints.getY();
-					}
-					if (name.equals("expRatio")) {
-						if (guNoelle.resultExperimentPoints == null) throw waiting;
-						return (double) guNoelle.resultExperimentPoints.getZ();
-					}
-					if (name.equals("stoneBonus")) {
-						if (guNoelle.resultExperimentPoints == null) throw waiting;
-						return (double) guNoelle.resultExperimentPoints.getW();
-					}
-					if (name.equals("baseExp")) {
-						if (guNoelle.resultExperimentPoints == null) throw waiting;
-						return 1.0 * guNoelle.resultExperimentPoints.getX() / guNoelle.resultExperimentPoints.getZ();
-					}
-					if (name.equals("gold")) {
-						if (guNoelle.city == null) throw waiting;
-						if (guNoelle.city.gold == null) throw waiting;
-						return (double) guNoelle.city.gold;
-					}
-					if (name.equals("mana")) {
-						if (guNoelle.city == null) throw waiting;
-						if (guNoelle.city.mana == null) throw waiting;
-						return (double) guNoelle.city.mana;
-					}
-					if (name.equals("unknown")) {
-						if (isUnknown == null) throw waiting;
-						return isUnknown;
-					}
-					if (name.equals("true")) {
-						return true;
-					}
-					if (name.equals("false")) {
-						return false;
-					}
-					throw new RuntimeException("No such variable: " + name);
-				}
-
-			});
+			res = node.value.calculate();
 		} catch (Waiting e) {
 			return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
 		} catch (Exception e) {
@@ -195,6 +142,97 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 	}
 
 	public static Waiting waiting = new Waiting();
+
+	private class VMNoelleImpl extends VMNoelle
+	{
+
+		@Override
+		public Object getVariable(String name)
+		{
+			if (name.equals("heroine")) {
+				if (!guNoelle.knownOrBlack) throw waiting;
+				if (guNoelle.heroine.get().name.equals("黒")) throw waiting;
+				return guNoelle.heroine.get().name;
+			}
+			if (name.equals("class")) {
+				if (!guNoelle.knownOrBlack) throw waiting;
+				if (guNoelle.heroine.get().name.equals("黒")) throw waiting;
+				return RegistryHeroine.buttleClasses.get(guNoelle.heroine.get().name);
+			}
+			if (name.equals("captainExp")) {
+				if (guNoelle.resultExperimentPoints == null) throw waiting;
+				return (double) guNoelle.resultExperimentPoints.getX();
+			}
+			if (name.equals("heroineExp")) {
+				if (guNoelle.resultExperimentPoints == null) throw waiting;
+				return (double) guNoelle.resultExperimentPoints.getY();
+			}
+			if (name.equals("expRatio")) {
+				if (guNoelle.resultExperimentPoints == null) throw waiting;
+				return (double) guNoelle.resultExperimentPoints.getZ();
+			}
+			if (name.equals("stoneBonus")) {
+				if (guNoelle.resultExperimentPoints == null) throw waiting;
+				return (double) guNoelle.resultExperimentPoints.getW();
+			}
+			if (name.equals("baseExp")) {
+				if (guNoelle.resultExperimentPoints == null) throw waiting;
+				return 1.0 * guNoelle.resultExperimentPoints.getX() / guNoelle.resultExperimentPoints.getZ();
+			}
+			if (name.equals("gold")) {
+				if (guNoelle.city == null) throw waiting;
+				if (guNoelle.city.gold == null) throw waiting;
+				return (double) guNoelle.city.gold;
+			}
+			if (name.equals("mana")) {
+				if (guNoelle.city == null) throw waiting;
+				if (guNoelle.city.mana == null) throw waiting;
+				return (double) guNoelle.city.mana;
+			}
+			if (name.equals("unknown")) {
+				if (isUnknown == null) throw waiting;
+				return isUnknown;
+			}
+			if (name.equals("true")) {
+				return true;
+			}
+			if (name.equals("false")) {
+				return false;
+			}
+			throw new RuntimeException("No such variable: " + name);
+		}
+
+		@Override
+		public Stream<String> getVariableNamesForString()
+		{
+			return Stream.of(
+				"heroine",
+				"class");
+		}
+
+		@Override
+		public Stream<String> getVariableNamesForDouble()
+		{
+			return Stream.of(
+				"captainExp",
+				"heroineExp",
+				"expRatio",
+				"stoneBonus",
+				"baseExp",
+				"gold",
+				"mana");
+		}
+
+		@Override
+		public Stream<String> getVariableNamesForBoolean()
+		{
+			return Stream.of(
+				"unknown",
+				"true",
+				"false");
+		}
+
+	}
 
 	public static class Waiting extends RuntimeException
 	{

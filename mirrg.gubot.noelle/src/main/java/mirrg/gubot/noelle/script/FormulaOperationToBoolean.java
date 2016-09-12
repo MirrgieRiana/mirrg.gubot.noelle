@@ -8,9 +8,9 @@ public class FormulaOperationToBoolean<A, B> implements IFormulaBoolean
 	public IFunction<A, B> function;
 
 	@Override
-	public boolean calculate(VMNoelle vm)
+	public boolean calculate()
 	{
-		return function.calculate(vm, left, right);
+		return function.calculate(left, right);
 	}
 
 	public void setLeft(A left)
@@ -26,7 +26,7 @@ public class FormulaOperationToBoolean<A, B> implements IFormulaBoolean
 	public static interface IFunction<A, B>
 	{
 
-		public boolean calculate(VMNoelle vm, A a, B b);
+		public boolean calculate(A a, B b);
 
 	}
 

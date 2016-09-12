@@ -4,7 +4,7 @@ import static mirrg.helium.compile.oxygen.parser.HSyntaxOxygen.*;
 
 import java.util.ArrayList;
 
-import mirrg.helium.compile.oxygen.parser.core.ISyntax;
+import mirrg.helium.compile.oxygen.parser.core.Syntax;
 import mirrg.helium.standard.hydrogen.struct.Struct2;
 
 public class FormulaOperationArray implements IFormulaBoolean
@@ -14,18 +14,18 @@ public class FormulaOperationArray implements IFormulaBoolean
 	public ArrayList<Struct2<IFunctionBoolean, IFormulaBoolean>> right;
 
 	@Override
-	public boolean calculate(VMNoelle vm)
+	public boolean calculate()
 	{
-		boolean value = left.calculate(vm);
+		boolean value = left.calculate();
 		for (Struct2<IFunctionBoolean, IFormulaBoolean> a : right) {
-			value = a.x.apply(vm, value, a.y.calculate(vm));
+			value = a.x.apply(value, a.y.calculate());
 		}
 		return value;
 	}
 
-	public static ISyntax<IFormulaBoolean> operation(
-		ISyntax<IFormulaBoolean> syntaxOperand,
-		ISyntax<IFunctionBoolean> syntaxOperator)
+	public static Syntax<IFormulaBoolean> operation(
+		Syntax<IFormulaBoolean> syntaxOperand,
+		Syntax<IFunctionBoolean> syntaxOperator)
 	{
 		return wrap(serial(FormulaOperationArray::new)
 			.and(syntaxOperand, (n1, n2) -> n1.left = n2)
