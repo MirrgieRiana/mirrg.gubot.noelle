@@ -1,12 +1,15 @@
 package mirrg.gubot.noelle.pluginsearch;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 
-public class PluginSearchHeroine implements IPluginSearch
+public class PluginSearchHeroine implements IPluginSearchLegacy
 {
 
 	private GUNoelle guNoelle;
+	@XStreamOmitField
 	private DialogPluginLegacy dialog;
 
 	public PluginSearchHeroine(GUNoelle guNoelle, DialogPluginLegacy dialog)
@@ -15,6 +18,13 @@ public class PluginSearchHeroine implements IPluginSearch
 		this.dialog = dialog;
 	}
 
+	@Override
+	public void setDialog(DialogPluginLegacy dialog)
+	{
+		this.dialog = dialog;
+	}
+
+	@XStreamOmitField
 	private int time = 0;
 
 	@Override

@@ -14,7 +14,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +47,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
@@ -377,11 +387,27 @@ public class GUNoelle
 										listModelPluginSearch = new DefaultListModel<>();
 										listPluginSearch = new JList<>(listModelPluginSearch);
 
-										addPlugin(new PluginSearchWaitExp(this));
-										addPlugin(new PluginSearchIconified(this));
-										addPlugin(new PluginSearchGUScreen(this));
-										addPlugin(new PluginSearchCursor(this));
-										addPlugin(new PluginSearchLegacy(this));
+										File file = getFilePlugins();
+										ArrayList<IPluginSearchVisible> object = null;
+										if (file.isFile()) {
+											try {
+												object = (ArrayList<IPluginSearchVisible>) getXStream().fromXML(new FileInputStream(file));
+											} catch (Exception e) {
+												HLog.processException(e);
+											}
+										}
+										if (object == null) {
+											object = new ArrayList<>();
+											object.add(new PluginSearchWaitExp(this));
+											object.add(new PluginSearchIconified(this));
+											object.add(new PluginSearchGUScreen(this));
+											object.add(new PluginSearchCursor(this));
+											object.add(new PluginSearchLegacy(this));
+											object.forEach(this::addPlugin);
+											savePlugins();
+										} else {
+											object.forEach(this::addPlugin);
+										}
 
 										return listPluginSearch;
 									}), 300, 150),
@@ -392,6 +418,7 @@ public class GUNoelle
 													s.get().onDeleted();
 													listModelPluginSearch.removeElement(s);
 												});
+											savePlugins();
 										}),
 										get(() -> {
 											JMenuBar menuBar = new JMenuBar();
@@ -400,6 +427,7 @@ public class GUNoelle
 													m.add(HSwing.addActionListener(new JMenuItem(f.getY()), e2 -> {
 														IPluginSearchVisible plugin = f.getX().apply(this);
 														addPlugin(plugin);
+														savePlugins();
 														plugin.openDialog();
 													}));
 												});
@@ -412,6 +440,10 @@ public class GUNoelle
 												listPluginSearch.getSelectedValuesList().stream()
 													.map(NamedSlot::get)
 													.forEach(IPluginSearch::openDialog);
+											}),
+											createButton("保存", e -> {
+												savePlugins();
+												setStatusBar("設定を保存しました。");
 											})))))),
 							c -> {
 								((JComponent) c).setBorder(new BevelBorder(BevelBorder.LOWERED));
@@ -499,9 +531,84 @@ public class GUNoelle
 		start();
 	}
 
+	private File getFilePlugins()
+	{
+		return new File("plugins.xml");
+	}
+
+	private XStream getXStream()
+	{
+		XStream xStream = new XStream();
+		xStream.autodetectAnnotations(true);
+		xStream.registerConverter(new Converter() {
+
+			@Override
+			public boolean canConvert(Class type)
+			{
+				return type == GUNoelle.class;
+			}
+
+			@Override
+			public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context)
+			{
+
+			}
+
+			@Override
+			public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
+			{
+				return GUNoelle.this;
+			}
+
+		});
+		xStream.registerConverter(new Converter() {
+
+			private Converter converter = new ReflectionConverter(xStream.getMapper(), xStream.getReflectionProvider());
+
+			@SuppressWarnings("rawtypes")
+			@Override
+			public boolean canConvert(Class type)
+			{
+				return IConvertable.class.isAssignableFrom(type);
+			}
+
+			@Override
+			public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context)
+			{
+				IConvertable object = (IConvertable) converter.unmarshal(reader, context);
+				object.afterUnmarshal();
+				return object;
+			}
+
+			@Override
+			public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context)
+			{
+				IConvertable source2 = (IConvertable) source;
+				source2.beforeMarshal();
+				source2.marshal(() -> {
+					converter.marshal(source, writer, context);
+				}, source, writer, context);
+			}
+
+		}, XStream.PRIORITY_NORMAL);
+		return xStream;
+	}
+
 	protected void addPlugin(IPluginSearchVisible plugin)
 	{
 		listModelPluginSearch.addElement(new NamedSlot<>(plugin, IPluginSearchVisible::getDescription));
+	}
+
+	protected void savePlugins()
+	{
+		ArrayList<IPluginSearchVisible> object = HLambda.toStream(listModelPluginSearch.elements())
+			.map(NamedSlot::get)
+			.collect(Collectors.toCollection(ArrayList::new));
+		try {
+			getXStream().toXML(object, new FileOutputStream(getFilePlugins()));
+		} catch (FileNotFoundException e) {
+			HLog.processException(e);
+		}
 	}
 
 	protected void setStatusBar(String text)

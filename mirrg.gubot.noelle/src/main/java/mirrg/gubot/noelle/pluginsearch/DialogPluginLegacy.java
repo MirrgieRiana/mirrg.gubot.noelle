@@ -3,6 +3,7 @@ package mirrg.gubot.noelle.pluginsearch;
 import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.CardLayout;
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.swing.ImageIcon;
@@ -20,7 +21,7 @@ public class DialogPluginLegacy extends JDialog
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 4495118153371660785L;
 	protected JCheckBox checkBoxUnknownHeroine;
@@ -32,6 +33,47 @@ public class DialogPluginLegacy extends JDialog
 	protected JLabel faceLabelSelected;
 	protected JList<String> listHeroines;
 	protected JList<String> listButtleClass;
+
+	protected static class Data
+	{
+		protected boolean checkBoxUnknownHeroine;
+		protected boolean checkBoxExperienceTrap;
+		protected int spinnerExperienceMax;
+		protected int spinnerExperienceMin;
+		protected double spinnerExperienceRatioMin;
+		protected int spinnerStoneBonusMin;
+		protected List<String> listHeroines;
+		protected List<String> listButtleClass;
+	}
+
+	public Data getData()
+	{
+		Data data = new Data();
+
+		data.checkBoxUnknownHeroine = checkBoxUnknownHeroine.isSelected();
+		data.checkBoxExperienceTrap = checkBoxExperienceTrap.isSelected();
+		data.spinnerExperienceMax = (Integer) spinnerExperienceMax.getValue();
+		data.spinnerExperienceMin = (Integer) spinnerExperienceMin.getValue();
+		data.spinnerExperienceRatioMin = (Double) spinnerExperienceRatioMin.getValue();
+		data.spinnerStoneBonusMin = (Integer) spinnerStoneBonusMin.getValue();
+		data.listHeroines = listHeroines.getSelectedValuesList();
+		data.listButtleClass = listButtleClass.getSelectedValuesList();
+
+		return data;
+	}
+
+	public void setData(Data data)
+	{
+		checkBoxUnknownHeroine.setSelected(data.checkBoxUnknownHeroine);
+		checkBoxExperienceTrap.setSelected(data.checkBoxExperienceTrap);
+		spinnerExperienceMax.setValue(data.spinnerExperienceMax);
+		spinnerExperienceMin.setValue(data.spinnerExperienceMin);
+		spinnerExperienceRatioMin.setValue(data.spinnerExperienceRatioMin);
+		spinnerStoneBonusMin.setValue(data.spinnerStoneBonusMin);
+		data.listHeroines.forEach(o -> listHeroines.setSelectedValue(o, true));
+		data.listButtleClass.forEach(o -> listButtleClass.setSelectedValue(o, true));
+		updateLabel();
+	}
 
 	public DialogPluginLegacy()
 	{
@@ -96,16 +138,7 @@ public class DialogPluginLegacy extends JDialog
 							refreshHeroines();
 						});
 						listHeroines.addListSelectionListener(e -> {
-							String name = listHeroines.getSelectedValue();
-							if (name != null) {
-								if (name.equals("None")) {
-									faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
-								} else {
-									faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
-								}
-							} else {
-								faceLabelSelected.setIcon(null);
-							}
+							updateLabel();
 						});
 						return createScrollPane(listHeroines, 120, 200);
 					})),
@@ -117,6 +150,20 @@ public class DialogPluginLegacy extends JDialog
 						.toArray(String[]::new));
 					return createScrollPane(listButtleClass, 120, 300);
 				}))));
+	}
+
+	private void updateLabel()
+	{
+		String name = listHeroines.getSelectedValue();
+		if (name != null) {
+			if (name.equals("None")) {
+				faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get("黒").image));
+			} else {
+				faceLabelSelected.setIcon(new ImageIcon(RegistryHeroine.get(name).image));
+			}
+		} else {
+			faceLabelSelected.setIcon(null);
+		}
 	}
 
 	private void refreshHeroines()

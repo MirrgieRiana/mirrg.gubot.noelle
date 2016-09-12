@@ -1,5 +1,7 @@
 package mirrg.gubot.noelle.pluginsearch;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 

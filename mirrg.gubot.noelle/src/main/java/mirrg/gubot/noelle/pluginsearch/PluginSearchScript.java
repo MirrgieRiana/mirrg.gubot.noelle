@@ -9,7 +9,10 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.WindowConstants;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import mirrg.gubot.noelle.GUNoelle;
+import mirrg.gubot.noelle.IConvertable;
 import mirrg.gubot.noelle.RegistryHeroine;
 import mirrg.gubot.noelle.script.IFormulaBoolean;
 import mirrg.gubot.noelle.script.ScriptNoelle;
@@ -19,19 +22,36 @@ import mirrg.helium.compile.oxygen.util.PanelSyntax;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
 import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
-public class PluginSearchScript implements IPluginSearchVisible
+public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 {
 
 	private GUNoelle guNoelle;
+	@XStreamOmitField
 	private JDialog dialog;
+	@XStreamOmitField
 	private PanelSyntax panelSyntax;
 	private String src;
+	@XStreamOmitField
 	private Node<IFormulaBoolean> node;
 
 	public PluginSearchScript(GUNoelle guNoelle)
 	{
 		this.guNoelle = guNoelle;
 
+		System.out.println(src);
+		src = ScriptNoelle.sampleSrc;
+		System.out.println(src);
+		init2();
+	}
+
+	@Override
+	public void afterUnmarshal()
+	{
+		init2();
+	}
+
+	private void init2()
+	{
 		dialog = new JDialog(guNoelle.frameMain, "闇のスクリプト");
 		{
 			dialog.setLayout(new CardLayout());
@@ -46,14 +66,13 @@ public class PluginSearchScript implements IPluginSearchVisible
 					}
 					return textPane;
 				}), 200, 100),
-				panelSyntax = new PanelSyntax(ScriptNoelle.getParser(), ScriptNoelle.sampleSrc)));
+				panelSyntax = new PanelSyntax(ScriptNoelle.getParser(), src)));
 
 			dialog.pack();
 			dialog.setLocationByPlatform(true);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 
-		src = "heroine='サロメ'/'ナノ'/'マリシャス'";
 		node = ScriptNoelle.getParser().parse(src);
 
 		panelSyntax.eventManager.register(String.class, s -> {
@@ -146,13 +165,16 @@ public class PluginSearchScript implements IPluginSearchVisible
 		}
 	}
 
+	@XStreamOmitField
 	private int time = 0;
+	@XStreamOmitField
 	private Boolean isUnknown;
 
 	@Override
 	public void onSkipped()
 	{
 		time = 0;
+		isUnknown = null;
 	}
 
 	private boolean updateUnknown(int milis)
