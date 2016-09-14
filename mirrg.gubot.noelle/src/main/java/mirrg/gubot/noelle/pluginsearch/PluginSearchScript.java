@@ -3,11 +3,8 @@ package mirrg.gubot.noelle.pluginsearch;
 import static mirrg.helium.swing.nitrogen.util.HSwing.*;
 
 import java.awt.CardLayout;
-import java.io.IOException;
-import java.util.stream.Stream;
 
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.WindowConstants;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -15,13 +12,13 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import mirrg.gubot.noelle.GUNoelle;
 import mirrg.gubot.noelle.IConvertable;
 import mirrg.gubot.noelle.RegistryHeroine;
-import mirrg.gubot.noelle.script.IFormulaBoolean;
-import mirrg.gubot.noelle.script.ScriptNoelle;
-import mirrg.gubot.noelle.script.VMNoelle;
 import mirrg.helium.compile.oxygen.parser.core.Node;
-import mirrg.helium.compile.oxygen.util.PanelSyntax;
+import mirrg.helium.compile.oxygen.util.EventPanelSyntax;
+import mirrg.helium.compile.oxygen.util.apatite.Formula;
+import mirrg.helium.compile.oxygen.util.apatite.PanelApatite;
+import mirrg.helium.compile.oxygen.util.apatite.vm1.Syntaxes1;
+import mirrg.helium.compile.oxygen.util.apatite.vm1.VM1;
 import mirrg.helium.standard.hydrogen.struct.Tuple;
-import mirrg.helium.swing.nitrogen.wrapper.artifacts.logging.HLog;
 
 public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 {
@@ -32,18 +29,16 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 	@XStreamOmitField
 	private JDialog dialog;
 	@XStreamOmitField
-	private PanelSyntax panelSyntax;
+	private PanelApatite panelApatite;
 	private String src;
 	@XStreamOmitField
-	private Node<IFormulaBoolean> node;
+	private Node<Formula> node;
 
 	public PluginSearchScript(GUNoelle guNoelle)
 	{
 		this.guNoelle = guNoelle;
 
-		System.out.println(src);
-		src = ScriptNoelle.sampleSrc;
-		System.out.println(src);
+		src = "heroine == 'サロメ' || heroine == 'ナノ' || heroine == 'マリシャス'";
 		init2();
 	}
 
@@ -60,34 +55,33 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 		dialog = new JDialog(guNoelle.frameMain, "闇のスクリプト");
 		{
 			dialog.setLayout(new CardLayout());
-			dialog.add(createSplitPaneVertical(
-				createScrollPane(get(() -> {
-					JEditorPane textPane = new JEditorPane();
-					textPane.setEditable(false);
-					try {
-						textPane.setPage(getClass().getResource("help.html"));
-					} catch (IOException e) {
-						HLog.processException(e);
-					}
-					return textPane;
-				}), 200, 100),
-				panelSyntax = new PanelSyntax(ScriptNoelle.getParser(vm), src)));
+			dialog.add(get(() -> {
+				panelApatite = new PanelApatite(Syntaxes1.root, vm);
+				panelApatite.getPanelSyntax().set(src);
+				return panelApatite;
+			}));
 
 			dialog.pack();
 			dialog.setLocationByPlatform(true);
 			dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 
-		node = ScriptNoelle.getParser(vm).parse(src);
+		node = Syntaxes1.root.parse(src);
 
-		panelSyntax.eventManager.register(String.class, s -> {
-			Node<IFormulaBoolean> node = ScriptNoelle.getParser(vm).parse(s);
-			if (node != null) {
-				this.node = node;
-				src = s;
+		String[] src2 = new String[1];
+		panelApatite.getPanelSyntax().eventManager.register(EventPanelSyntax.Edit.class, e -> {
+			src2[0] = e.source;
+		});
+		panelApatite.getPanelSyntax().eventManager.register(EventPanelSyntax.Parsed.class, e -> {
+			if (e.timing == EventPanelSyntax.Parsed.TIMING_USER_EDIT) {
+				this.node = (Node<Formula>) e.node;
+				src = src2[0];
 			}
 		});
 	}
+
+	@XStreamOmitField
+	private boolean occurWaitintException = false;
 
 	@Override
 	public Tuple<EnumPluginSearchCondition, String> tick(int milis)
@@ -97,13 +91,15 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 		if (node == null) return new Tuple<>(EnumPluginSearchCondition.STOP, "スクリプトが不正です。");
 
 		boolean res;
+		occurWaitintException = true;
 		try {
-			res = node.value.calculate();
+			res = (boolean) node.value.calculate(vm.createRuntime());
 		} catch (Waiting e) {
 			return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
 		} catch (Exception e) {
 			return new Tuple<>(EnumPluginSearchCondition.STOP, "ScriptError: " + e.getMessage());
 		}
+		occurWaitintException = false;
 
 		if (res) {
 			return new Tuple<>(EnumPluginSearchCondition.STOP, "スクリプトの条件にマッチしました。");
@@ -143,93 +139,88 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 
 	public static Waiting waiting = new Waiting();
 
-	private class VMNoelleImpl extends VMNoelle
+	private class VMNoelleImpl extends VM1
 	{
 
-		@Override
-		public Object getVariable(String name)
+		public VMNoelleImpl()
 		{
-			if (name.equals("heroine")) {
+			registerConstant(VM1.STRING, "heroine", "waiting");
+			registerConstant(VM1.STRING, "class", "waiting");
+
+			registerConstant(VM1.INTEGER, "captainExp", -4142);
+			registerConstant(VM1.INTEGER, "heroineExp", -4142);
+			registerConstant(VM1.DOUBLE, "expRatio", -4142.0);
+			registerConstant(VM1.INTEGER, "stoneBonus", -4142);
+			registerConstant(VM1.DOUBLE, "baseExp", -4142.0);
+			registerConstant(VM1.INTEGER, "gold", -4142);
+			registerConstant(VM1.INTEGER, "mana", -4142);
+
+			registerConstant(VM1.BOOLEAN, "unknown", false);
+		}
+
+		@Override
+		public Object getVariableContent(String identifier)
+		{
+			try {
+				return getVariableContentImpl(identifier);
+			} catch (Waiting e) {
+				if (occurWaitintException) {
+					throw e;
+				} else {
+					return super.getVariableContent(identifier);
+				}
+			}
+		}
+
+		public Object getVariableContentImpl(String identifier)
+		{
+			if (identifier.equals("heroine")) {
 				if (!guNoelle.knownOrBlack) throw waiting;
 				if (guNoelle.heroine.get().name.equals("黒")) throw waiting;
 				return guNoelle.heroine.get().name;
 			}
-			if (name.equals("class")) {
+			if (identifier.equals("class")) {
 				if (!guNoelle.knownOrBlack) throw waiting;
 				if (guNoelle.heroine.get().name.equals("黒")) throw waiting;
 				return RegistryHeroine.buttleClasses.get(guNoelle.heroine.get().name);
 			}
-			if (name.equals("captainExp")) {
+
+			if (identifier.equals("captainExp")) {
 				if (guNoelle.resultExperimentPoints == null) throw waiting;
-				return (double) guNoelle.resultExperimentPoints.getX();
+				return guNoelle.resultExperimentPoints.getX();
 			}
-			if (name.equals("heroineExp")) {
+			if (identifier.equals("heroineExp")) {
 				if (guNoelle.resultExperimentPoints == null) throw waiting;
-				return (double) guNoelle.resultExperimentPoints.getY();
+				return guNoelle.resultExperimentPoints.getY();
 			}
-			if (name.equals("expRatio")) {
+			if (identifier.equals("expRatio")) {
 				if (guNoelle.resultExperimentPoints == null) throw waiting;
-				return (double) guNoelle.resultExperimentPoints.getZ();
+				return guNoelle.resultExperimentPoints.getZ();
 			}
-			if (name.equals("stoneBonus")) {
+			if (identifier.equals("stoneBonus")) {
 				if (guNoelle.resultExperimentPoints == null) throw waiting;
-				return (double) guNoelle.resultExperimentPoints.getW();
+				return guNoelle.resultExperimentPoints.getW();
 			}
-			if (name.equals("baseExp")) {
+			if (identifier.equals("baseExp")) {
 				if (guNoelle.resultExperimentPoints == null) throw waiting;
 				return 1.0 * guNoelle.resultExperimentPoints.getX() / guNoelle.resultExperimentPoints.getZ();
 			}
-			if (name.equals("gold")) {
+			if (identifier.equals("gold")) {
 				if (guNoelle.city == null) throw waiting;
 				if (guNoelle.city.gold == null) throw waiting;
-				return (double) guNoelle.city.gold;
+				return guNoelle.city.gold;
 			}
-			if (name.equals("mana")) {
+			if (identifier.equals("mana")) {
 				if (guNoelle.city == null) throw waiting;
 				if (guNoelle.city.mana == null) throw waiting;
-				return (double) guNoelle.city.mana;
+				return guNoelle.city.mana;
 			}
-			if (name.equals("unknown")) {
+
+			if (identifier.equals("unknown")) {
 				if (isUnknown == null) throw waiting;
 				return isUnknown;
 			}
-			if (name.equals("true")) {
-				return true;
-			}
-			if (name.equals("false")) {
-				return false;
-			}
-			throw new RuntimeException("No such variable: " + name);
-		}
-
-		@Override
-		public Stream<String> getVariableNamesForString()
-		{
-			return Stream.of(
-				"heroine",
-				"class");
-		}
-
-		@Override
-		public Stream<String> getVariableNamesForDouble()
-		{
-			return Stream.of(
-				"captainExp",
-				"heroineExp",
-				"expRatio",
-				"stoneBonus",
-				"baseExp",
-				"gold",
-				"mana");
-		}
-
-		@Override
-		public Stream<String> getVariableNamesForBoolean()
-		{
-			return Stream.of(
-				"unknown",
-				"true",
-				"false");
+			return super.getVariableContent(identifier);
 		}
 
 	}
