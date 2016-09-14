@@ -18,6 +18,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -518,7 +520,8 @@ public class GUNoelle
 		ArrayList<IPluginSearchVisible> object = null;
 		if (file.isFile()) {
 			try {
-				object = (ArrayList<IPluginSearchVisible>) getXStream().fromXML(new FileInputStream(file));
+				object = (ArrayList<IPluginSearchVisible>) getXStream().fromXML(
+					new InputStreamReader(new FileInputStream(file), "UTF-8"));
 			} catch (Exception e) {
 				HLog.processException(e);
 			}
@@ -614,7 +617,7 @@ public class GUNoelle
 			.map(NamedSlot::get)
 			.collect(Collectors.toCollection(ArrayList::new));
 		try {
-			getXStream().toXML(object, new FileOutputStream(getFilePlugins()));
+			getXStream().toXML(object, new OutputStreamWriter(new FileOutputStream(getFilePlugins())));
 		} catch (FileNotFoundException e) {
 			HLog.processException(e);
 		}
