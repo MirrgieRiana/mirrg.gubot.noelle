@@ -110,6 +110,7 @@ public class TableCityRecord extends JTable
 		}
 		if (out != null) {
 			if (cities.size() == 10) {
+				out.println(City.getHeader());
 				cities.forEach(c -> out.println(c.toString()));
 			} else if (cities.size() > 10) {
 				out.println(city.toString());
