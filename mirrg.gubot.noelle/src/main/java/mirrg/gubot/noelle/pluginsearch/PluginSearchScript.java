@@ -67,15 +67,18 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 		}
 
 		node = Syntaxes1.root.parse(src);
+		if (node != null && !node.value.validate(vm).isValid()) node = null;
 
-		String[] src2 = new String[1];
 		panelApatite.getPanelSyntax().eventManager.register(EventPanelSyntax.Edit.class, e -> {
-			src2[0] = e.source;
+			src = e.source;
+
+			node = Syntaxes1.root.parse(src);
+			if (node != null && !node.value.validate(vm).isValid()) node = null;
 		});
 		panelApatite.getPanelSyntax().eventManager.register(EventPanelSyntax.Parsed.class, e -> {
 			if (e.timing == EventPanelSyntax.Parsed.TIMING_USER_EDIT) {
 				this.node = (Node<Formula>) e.node;
-				src = src2[0];
+				if (node != null && !node.value.validate(vm).isValid()) node = null;
 			}
 		});
 	}
@@ -97,6 +100,7 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 		} catch (Waiting e) {
 			return new Tuple<>(EnumPluginSearchCondition.WAITING, null);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return new Tuple<>(EnumPluginSearchCondition.STOP, "ScriptError: " + e.getMessage());
 		}
 		occurWaitintException = false;
