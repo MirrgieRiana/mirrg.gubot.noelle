@@ -32,4 +32,30 @@ public class City
 		if (parent != null) parent.repaint(this);
 	}
 
+	public static String getHeader()
+	{
+		return "Date,Time,Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana";
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+			time.toLocalDate(),
+			time.toLocalTime(),
+			heroine.name,
+			captainExperience,
+			heroineExperience,
+			baseExperience,
+			experienceRatio,
+			stoneBonus,
+			gold,
+			mana);
+	}
+
+	public void compile()
+	{
+		if (parent != null) parent.compile(this);
+	}
+
 }

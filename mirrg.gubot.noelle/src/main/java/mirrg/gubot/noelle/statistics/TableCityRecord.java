@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
+import mirrg.gubot.noelle.GUNoelle;
 import mirrg.gubot.noelle.glyph.EnumGlyphColor;
 import mirrg.gubot.noelle.glyph.Glyph;
 import mirrg.gubot.noelle.glyph.ISyntax;
@@ -73,6 +75,8 @@ public class TableCityRecord extends JTable
 			.sum();
 	}
 
+	public PrintStream out;
+
 	public void add(City city)
 	{
 		cities.add(city);
@@ -82,6 +86,35 @@ public class TableCityRecord extends JTable
 
 		tableModel.setRowCount(tableModel.getRowCount() + 1);
 		repaint(city);
+	}
+
+	public void compile(City city)
+	{
+		label1:
+		if (cities.size() == 10) {
+			File dir = new File("logs");
+			GUNoelle.prepareDirectory(dir);
+
+			for (int i = 0; i < 1000; i++) {
+				File file = new File(dir, "log" + i + ".csv");
+				if (!file.exists()) {
+					try {
+						out = new PrintStream(new FileOutputStream(file));
+					} catch (FileNotFoundException e) {
+						HLog.processException(e);
+					}
+					break label1;
+				}
+			}
+			HLog.processException(new IOException("ログフォルダが満杯です: " + dir));
+		}
+		if (out != null) {
+			if (cities.size() == 10) {
+				cities.forEach(c -> out.println(c.toString()));
+			} else if (cities.size() > 10) {
+				out.println(city.toString());
+			}
+		}
 	}
 
 	public void reset()
@@ -124,20 +157,8 @@ public class TableCityRecord extends JTable
 	public String getCSVData()
 	{
 		StringBuffer sb = new StringBuffer();
-		sb.append("Date,Time,Heroine,CaptainExp,HeroineExp,BaseExp,ExpRatio,StoneBonus,Gold,Mana\n");
-		cities.forEach(c -> {
-			sb.append(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
-				c.time.toLocalDate(),
-				c.time.toLocalTime(),
-				c.heroine.name,
-				c.captainExperience,
-				c.heroineExperience,
-				c.baseExperience,
-				c.experienceRatio,
-				c.stoneBonus,
-				c.gold,
-				c.mana));
-		});
+		sb.append(City.getHeader() + "\n");
+		cities.forEach(c -> sb.append(c.toString() + "\n"));
 		return sb.toString();
 	}
 

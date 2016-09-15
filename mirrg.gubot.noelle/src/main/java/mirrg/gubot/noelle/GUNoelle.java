@@ -831,6 +831,7 @@ public class GUNoelle
 							boolean newPhase = !heroine.get().name.equals("黒");
 
 							if (!phase && newPhase) {
+								if (city != null) city.compile();
 								city = new City(LocalDateTime.now());
 								city.heroine = heroine.get();
 								tableCityRecord.add(city);
