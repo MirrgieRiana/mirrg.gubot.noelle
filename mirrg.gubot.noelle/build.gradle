@@ -28,7 +28,7 @@ dependencies {
 	compile 'mirrg:mirrg.helium.standard.hydrogen.util:0.0.2'
 	compile 'mirrg:mirrg.helium.swing.nitrogen.util:+'
 	compile 'mirrg:mirrg.helium.swing.nitrogen.wrapper:+'
-	compile 'mirrg:mirrg.helium.compile.oxygen.parser:1.1.0'
+	compile 'mirrg:mirrg.helium.compile.oxygen.parser:1.1.1'
 
 	// https://mvnrepository.com/artifact/com.googlecode.soundlibs/basicplayer
 	compile group: 'com.googlecode.soundlibs', name: 'basicplayer', version: '3.0.0.0'
