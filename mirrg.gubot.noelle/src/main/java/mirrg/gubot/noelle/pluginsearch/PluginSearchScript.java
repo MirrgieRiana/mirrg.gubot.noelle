@@ -76,7 +76,7 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 			if (node != null && !node.value.validate(vm).isValid()) node = null;
 		});
 		panelApatite.getPanelSyntax().eventManager.register(EventPanelSyntax.Parsed.class, e -> {
-			if (e.timing == EventPanelSyntax.Parsed.TIMING_USER_EDIT) {
+			if (e.timing == EventPanelSyntax.Parsed.TIMING_EDIT) {
 				this.node = (Node<Formula>) e.node;
 				if (node != null && !node.value.validate(vm).isValid()) node = null;
 			}
