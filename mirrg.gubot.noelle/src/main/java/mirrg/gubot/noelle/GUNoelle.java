@@ -286,6 +286,8 @@ public class GUNoelle
 						return;
 					}
 
+					if (checkBoxSound.isSelected()) playSound(EnumSound.SHOT);
+
 					setStatusBar("スクショ保存：" + file);
 				}));
 				menuBar.add(get(() -> {
@@ -390,13 +392,13 @@ public class GUNoelle
 										}))),
 								createBorderPanelLeft(
 									get(() -> {
-										checkBoxSound = new JCheckBox("停止時音を鳴らす");
+										checkBoxSound = new JCheckBox("音を鳴らす");
 										checkBoxSound.setSelected(true);
 										return checkBoxSound;
 									}),
 									createBorderPanelRight(
 										null,
-										createButton("試聴", e -> playSound()))),
+										createButton("試聴", e -> playSound(EnumSound.DIE)))),
 								createBorderPanelDown(
 									createScrollPane(get(() -> {
 										listModelPluginSearch = new DefaultListModel<>();
@@ -733,7 +735,7 @@ public class GUNoelle
 					labelSearching.setText("停止中");
 				});
 
-				if (checkBoxSound.isSelected()) playSound();
+				if (checkBoxSound.isSelected()) playSound(EnumSound.DIE);
 
 			}
 		});
@@ -741,11 +743,11 @@ public class GUNoelle
 		thread.start();
 	}
 
-	private void playSound()
+	private void playSound(EnumSound sound)
 	{
 		BasicPlayer basicPlayerDie = new BasicPlayer();
 		try {
-			basicPlayerDie.open(new File("die.mp3"));
+			basicPlayerDie.open(sound.file);
 			basicPlayerDie.play();
 		} catch (BasicPlayerException e) {
 			HLog.processException(e);
