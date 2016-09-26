@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -98,9 +99,18 @@ public class GUNoelle
 		}
 	}
 
+	public static Properties properties;
+
 	public static void main(String[] args) throws Exception
 	{
 		UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+
+		{
+			properties = new Properties();
+			InputStreamReader in = new InputStreamReader(new FileInputStream(new File("config.properties")), "UTF-8");
+			properties.load(in);
+			in.close();
+		}
 
 		RegistryHeroine.init();
 
@@ -153,10 +163,10 @@ public class GUNoelle
 		this.width = width;
 
 		{
-			frameMain = new JFrame("闇のツール");
+			frameMain = new JFrame(properties.getProperty("gui.title"));
 
 			{
-				File file = new File("faces/ノエル.png");
+				File file = new File(properties.getProperty("gui.icon"));
 				if (file.isFile()) {
 					try {
 						frameMain.setIconImage(ImageIO.read(file));
@@ -313,18 +323,18 @@ public class GUNoelle
 						createBorderPanelDown(
 							get(() -> {
 								listBlackPixels = new JList<>();
-								listBlackPixels.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
+								listBlackPixels.setFont(new Font(properties.getProperty("gui.font"), Font.PLAIN, listBlackPixels.getFont().getSize()));
 								return createScrollPane(listBlackPixels, 260, 80);
 							}),
 							get(() -> {
 								labelGUFound = new JLabel();
 								setPreferredSize(labelGUFound, 200, 1);
-								labelGUFound.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
+								labelGUFound.setFont(new Font(properties.getProperty("gui.font"), Font.PLAIN, listBlackPixels.getFont().getSize()));
 								return labelGUFound;
 							}),
 							get(() -> {
 								labelSelecting = new JLabel();
-								labelSelecting.setFont(new Font("MS Gothic", Font.PLAIN, listBlackPixels.getFont().getSize()));
+								labelSelecting.setFont(new Font(properties.getProperty("gui.font"), Font.PLAIN, listBlackPixels.getFont().getSize()));
 								return labelSelecting;
 							})),
 						process(createSplitPaneVertical(
