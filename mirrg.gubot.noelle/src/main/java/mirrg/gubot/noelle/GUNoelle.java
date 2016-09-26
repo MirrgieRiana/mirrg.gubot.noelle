@@ -227,6 +227,18 @@ public class GUNoelle
 						});
 						menu.add(menuItem);
 					}
+					{
+						JMenuItem menuItem = new JMenuItem("統計ログフォルダを開く");
+						menuItem.addActionListener(e -> {
+							Runtime runtime = Runtime.getRuntime();
+							try {
+								runtime.exec("explorer \"" + new File("logs").getAbsolutePath() + "\"");
+							} catch (IOException e2) {
+								HLog.processException(e2);
+							}
+						});
+						menu.add(menuItem);
+					}
 					menuBar.add(menu);
 				}
 				{
