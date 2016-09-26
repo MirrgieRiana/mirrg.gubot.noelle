@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -629,8 +630,10 @@ public class GUNoelle
 			.map(NamedSlot::get)
 			.collect(Collectors.toCollection(ArrayList::new));
 		try {
-			getXStream().toXML(object, new OutputStreamWriter(new FileOutputStream(getFilePlugins())));
+			getXStream().toXML(object, new OutputStreamWriter(new FileOutputStream(getFilePlugins()), "UTF-8"));
 		} catch (FileNotFoundException e) {
+			HLog.processException(e);
+		} catch (UnsupportedEncodingException e) {
 			HLog.processException(e);
 		}
 	}
