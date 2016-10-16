@@ -539,6 +539,15 @@ public class GUNoelle
 		start();
 	}
 
+	private void resetPlugins()
+	{
+		HLambda.toStream(listModelPluginSearch.elements())
+			.map(NamedSlot::get)
+			.forEach(IPluginSearchVisible::closeDialog);
+
+		listModelPluginSearch.clear();
+	}
+
 	private void loadPlugins()
 	{
 		File file = getFilePlugins();
@@ -551,7 +560,7 @@ public class GUNoelle
 				HLog.processException(e);
 			}
 		}
-		listModelPluginSearch.clear();
+		resetPlugins();
 		if (object == null) {
 			object = new ArrayList<>();
 			object.add(new PluginSearchWaitExp(this));
