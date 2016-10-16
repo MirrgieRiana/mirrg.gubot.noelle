@@ -11,11 +11,14 @@ import mirrg.gubot.noelle.pluginsearch.DialogPluginLegacy.Data;
 public class PluginSearchLegacy extends PluginSearchGroup implements IPluginSearchVisible, IConvertable
 {
 
+	private GUNoelle guNoelle;
 	@XStreamOmitField
 	protected DialogPluginLegacy dialog;
 
 	public PluginSearchLegacy(GUNoelle guNoelle)
 	{
+		this.guNoelle = guNoelle;
+
 		init2();
 
 		add(new PluginSearchExperiencePoints(guNoelle, this));
@@ -24,7 +27,7 @@ public class PluginSearchLegacy extends PluginSearchGroup implements IPluginSear
 
 	private void init2()
 	{
-		dialog = new DialogPluginLegacy();
+		dialog = new DialogPluginLegacy(guNoelle.frameMain);
 		dialog.pack();
 		dialog.setLocationByPlatform(true);
 		dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);

@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JSpinner;
@@ -75,7 +76,19 @@ public class DialogPluginLegacy extends JDialog
 		updateLabel();
 	}
 
-	public DialogPluginLegacy()
+	public DialogPluginLegacy(JFrame owner)
+	{
+		super(owner);
+		init();
+	}
+
+	public DialogPluginLegacy(JDialog owner)
+	{
+		super(owner);
+		init();
+	}
+
+	private void init()
 	{
 		setLayout(new CardLayout());
 		add(createBorderPanelDown(
