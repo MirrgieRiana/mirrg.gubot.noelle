@@ -207,7 +207,7 @@ public class PluginSearchScript implements IPluginSearchVisible, IConvertable
 			}
 			if (identifier.equals("baseExp")) {
 				if (guNoelle.resultExperimentPoints == null) throw waiting;
-				return 1.0 * guNoelle.resultExperimentPoints.getX() / guNoelle.resultExperimentPoints.getZ();
+				return 1.0 * guNoelle.resultExperimentPoints.getY() / guNoelle.resultExperimentPoints.getZ();
 			}
 			if (identifier.equals("gold")) {
 				if (guNoelle.city == null) throw waiting;
