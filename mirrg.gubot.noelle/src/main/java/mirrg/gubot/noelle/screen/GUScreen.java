@@ -85,7 +85,7 @@ public abstract class GUScreen
 
 	public void mouseOn()
 	{
-		GUNoelle.ROBOT.mouseMove(screenX + width - 35, screenY + height - 115);
+		GUNoelle.ROBOT.mouseMove(screenX + width - 120, screenY + height - 115);
 	}
 
 	public Point getMouseLocation()

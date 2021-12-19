@@ -569,7 +569,6 @@ public class GUNoelle
 			object.add(new PluginSearchCursor(this));
 			object.add(new PluginSearchLegacy(this));
 			object.forEach(this::addPlugin);
-			savePlugins();
 		} else {
 			object.forEach(this::addPlugin);
 		}

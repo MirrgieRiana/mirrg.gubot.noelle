@@ -189,7 +189,7 @@ public class TableCityRecord extends JTable
 						.collect(Collectors.joining()), 10))))
 				.and(br())
 				.and(ch(registry, "ヒロインの獲得可能経験値：", EnumGlyphColor.WHITE))
-				.and(na("2", ma(re1(decimal.apply(co(EnumGlyphColor.WHITE, EnumGlyphColor.ORANGE))),
+				.and(na("2", ma(re1(decimal.apply(co(EnumGlyphColor.WHITE, EnumGlyphColor.ORANGE, EnumGlyphColor.RED))),
 					list -> Integer.parseInt(list.stream()
 						.map(g -> g.value)
 						.collect(Collectors.joining()), 10))))
@@ -203,6 +203,11 @@ public class TableCityRecord extends JTable
 						.and(br()))
 					.or(se(hash -> Double.parseDouble(((Glyph) hash.get("1")).value))
 						.and(na("1", decimal.apply(co(EnumGlyphColor.ORANGE))))
+						.and(ch(registry, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
+						.and(br()))
+					.or(se(hash -> Double.parseDouble(((Glyph) hash.get("1")).value + ((Glyph) hash.get("2")).value))
+						.and(na("1", decimal.apply(co(EnumGlyphColor.ORANGE))))
+						.and(na("2", decimal.apply(co(EnumGlyphColor.ORANGE))))
 						.and(ch(registry, "倍　経験値ボーナス発生！", EnumGlyphColor.ORANGE))
 						.and(br())))))
 				.and(na("4", op(or((Integer) null)
